@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/actividades")
+@RequestMapping("/actividad")
 public class ActividadController {
 
     private final ActividadService actividadService;
@@ -96,4 +96,5 @@ public class ActividadController {
 
         return actividadDTO;
     }
+
 }

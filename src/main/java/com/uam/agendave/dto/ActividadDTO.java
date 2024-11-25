@@ -14,7 +14,6 @@ import java.util.UUID;
 public class ActividadDTO {
 
     private UUID id; // Heredado de Identifiable
-    private String nombre; // Nombre de la actividad
     private String descripcion;
     private Date fecha;
     private Time horaInicio;

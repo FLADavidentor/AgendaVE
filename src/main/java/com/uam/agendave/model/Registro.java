@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -15,14 +17,14 @@ public class Registro extends Identifiable {
     private boolean transporte;
 
     @ManyToOne
-    @JoinColumn(name = "idEstudiante")
+    @JoinColumn(name = "idEstudiante", nullable = false)
     private Estudiante estudiante;
 
     @ManyToOne
-    @JoinColumn(name = "idActividad")
+    @JoinColumn(name = "idActividad", nullable = false)
     private Actividad actividad;
 
-    @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
+    @Enumerated(EnumType.STRING)
     private TipoConvalidacion tipoConvalidacion;
 
     public void validarConvalidacion() {
@@ -30,13 +32,11 @@ public class Registro extends Identifiable {
             Map<TipoConvalidacion, Integer> convalidaciones = actividad.getConvalidacionesPermitidas();
             Integer totalPermitido = actividad.getTotalConvalidacionesPermitidas();
 
-            // Verifica si la actividad permite convalidaciones
             if (convalidaciones == null || convalidaciones.isEmpty() || totalPermitido == null || totalPermitido <= 0) {
                 throw new IllegalStateException("La actividad no permite convalidaciones.");
             }
 
-            // Calcula el total de convalidaciones usadas
-            int usados = actividad.getRegistros().stream()
+            int usados = actividad.getRegistros() == null ? 0 : actividad.getRegistros().stream()
                     .filter(Registro::isConvalidacion)
                     .mapToInt(r -> convalidaciones.getOrDefault(r.getTipoConvalidacion(), 0))
                     .sum();
@@ -47,4 +47,5 @@ public class Registro extends Identifiable {
         }
     }
 }
+
 

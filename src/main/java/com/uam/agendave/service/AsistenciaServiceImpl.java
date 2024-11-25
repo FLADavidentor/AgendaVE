@@ -38,7 +38,8 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 
     @Override
     public List<Asistencia> obtenerTodas() {
-        return List.of();
+        // Utiliza el repositorio para obtener todas las asistencias desde la base de datos
+        return asistenciaRepository.findAll();
     }
 
     // Buscar asistencia por ID de actividad

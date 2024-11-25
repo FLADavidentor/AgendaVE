@@ -63,6 +63,13 @@ public class TipoActividadServiceImpl implements TipoActividadService {
                 .map(this::convertirAModeloDTO)
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<TipoActividadDTO> buscarPorNombreParcial(String parteDelNombre) {
+        return tipoActividadRepository.findByNombreTipoContainingIgnoreCase(parteDelNombre)
+                .stream()
+                .map(this::convertirAModeloDTO)
+                .collect(Collectors.toList());
+    }
 
     // Método para convertir el modelo de entidad TipoActividad a TipoActividadDTO
     private TipoActividadDTO convertirAModeloDTO(TipoActividad tipoActividad) {

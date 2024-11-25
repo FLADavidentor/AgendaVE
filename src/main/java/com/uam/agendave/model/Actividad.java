@@ -17,6 +17,8 @@ public class Actividad extends Identifiable {
     @ManyToOne
     @JoinColumn(name = "idNombreActividad", nullable = false) // Relación con NombreActividad
     private NombreActividad nombreActividad;
+    @Column(nullable = false)
+    private String nombre; // Este campo se llena automáticamente desde NombreActividad
     private String descripcion;
 
     @Temporal(TemporalType.DATE)

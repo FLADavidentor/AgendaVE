@@ -21,24 +21,19 @@ public class RegistroController {
     }
 
     @GetMapping
-    public List<Registro> obtenerTodos() {
+    public List<RegistroDTO> obtenerTodos() {
         return registroService.obtenerTodos();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Registro> obtenerPorId(@PathVariable UUID id) {
-        Registro registro = registroService.buscarPorId(id);
+    public ResponseEntity<RegistroDTO> obtenerPorId(@PathVariable UUID id) {
+        RegistroDTO registro = registroService.buscarPorId(id);
         return new ResponseEntity<>(registro, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Registro> guardar(@RequestBody RegistroDTO registroDTO) {
-        // Aquí podemos mapear el DTO a la entidad
-        Registro registro = new Registro();
-        // Aquí deberás mapear los campos del DTO al modelo de la entidad
-        // registro.set...
-
-        Registro nuevoRegistro = registroService.guardarRegistro(registro);
+    public ResponseEntity<RegistroDTO> guardar(@RequestBody RegistroDTO registroDTO) {
+        RegistroDTO nuevoRegistro = registroService.guardarRegistro(registroDTO);
         return new ResponseEntity<>(nuevoRegistro, HttpStatus.CREATED);
     }
 
@@ -49,12 +44,13 @@ public class RegistroController {
     }
 
     @GetMapping("/estudiante/{idEstudiante}")
-    public List<Registro> obtenerPorEstudiante(@PathVariable UUID idEstudiante) {
+    public List<RegistroDTO> obtenerPorEstudiante(@PathVariable UUID idEstudiante) {
         return registroService.buscarPorEstudiante(idEstudiante);
     }
 
     @GetMapping("/actividad/{idActividad}")
-    public List<Registro> obtenerPorActividad(@PathVariable UUID idActividad) {
+    public List<RegistroDTO> obtenerPorActividad(@PathVariable UUID idActividad) {
         return registroService.buscarPorActividad(idActividad);
     }
 }
+

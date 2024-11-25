@@ -1,12 +1,15 @@
 package com.uam.agendave.service;
 
+import com.uam.agendave.dto.RegistroDTO;
+import com.uam.agendave.model.Actividad;
+import com.uam.agendave.model.Estudiante;
 import com.uam.agendave.model.Registro;
 import com.uam.agendave.repository.RegistroRepository;
-import com.uam.agendave.service.RegistroService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class RegistroServiceImpl implements RegistroService {
@@ -18,20 +21,25 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    public List<Registro> obtenerTodos() {
-        return registroRepository.findAll();
+    public List<RegistroDTO> obtenerTodos() {
+        return registroRepository.findAll()
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Registro guardarRegistro(Registro registro) {
-        // Validar lógica relacionada a convalidaciones o transporte aquí, si aplica
-        return registroRepository.save(registro);
+    public RegistroDTO guardarRegistro(RegistroDTO registroDTO) {
+        Registro registro = convertirAEntidad(registroDTO);
+        Registro nuevoRegistro = registroRepository.save(registro);
+        return convertirADTO(nuevoRegistro);
     }
 
     @Override
-    public Registro buscarPorId(UUID id) {
-        return registroRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Registro no encontrado con ID: " + id));
+    public RegistroDTO buscarPorId(UUID id) {
+        Registro registro = registroRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Registro no encontrado con ID: " + id));
+        return convertirADTO(registro);
     }
 
     @Override
@@ -43,12 +51,79 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    public List<Registro> buscarPorEstudiante(UUID idEstudiante) {
-        return registroRepository.findByEstudianteId(idEstudiante);
+    public List<RegistroDTO> buscarPorEstudiante(UUID idEstudiante) {
+        return registroRepository.findByEstudianteId(idEstudiante)
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Registro> buscarPorActividad(UUID idActividad) {
-        return registroRepository.findByActividadId(idActividad);
+    public List<RegistroDTO> buscarPorActividad(UUID idActividad) {
+        return registroRepository.findByActividadId(idActividad)
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
     }
+
+    private Registro convertirAEntidad(RegistroDTO registroDTO) {
+        Registro registro = new Registro();
+        registro.setId(registroDTO.getId());
+        registro.setConvalidacion(registroDTO.isConvalidacion());
+        registro.setTransporte(registroDTO.isTransporte());
+
+        if (registroDTO.getIdEstudiante() != null) {
+            Estudiante estudiante = new Estudiante();
+            estudiante.setId(registroDTO.getIdEstudiante());
+            registro.setEstudiante(estudiante);
+        }
+
+        if (registroDTO.getIdActividad() != null) {
+            Actividad actividad = new Actividad();
+            actividad.setId(registroDTO.getIdActividad());
+            registro.setActividad(actividad);
+        }
+
+        return registro;
+    }
+
+    private RegistroDTO convertirADTO(Registro registro) {
+        RegistroDTO registroDTO = new RegistroDTO();
+        registroDTO.setId(registro.getId());
+        registroDTO.setConvalidacion(registro.isConvalidacion());
+        registroDTO.setTransporte(registro.isTransporte());
+
+        if (registro.getEstudiante() != null) {
+            registroDTO.setIdEstudiante(registro.getEstudiante().getId());
+        }
+
+        if (registro.getActividad() != null) {
+            registroDTO.setIdActividad(registro.getActividad().getId());
+        }
+
+        return registroDTO;
+    }
+    @Override
+    public Registro convertirADetalleAsistencia(RegistroDTO registroDTO) {
+        Registro registro = new Registro();
+        registro.setId(registroDTO.getId());
+        registro.setConvalidacion(registroDTO.isConvalidacion());
+        registro.setTransporte(registroDTO.isTransporte());
+
+        if (registroDTO.getIdEstudiante() != null) {
+            Estudiante estudiante = new Estudiante();
+            estudiante.setId(registroDTO.getIdEstudiante());
+            registro.setEstudiante(estudiante);
+        }
+
+        if (registroDTO.getIdActividad() != null) {
+            Actividad actividad = new Actividad();
+            actividad.setId(registroDTO.getIdActividad());
+            registro.setActividad(actividad);
+        }
+
+        return registro;
+    }
+
 }
+

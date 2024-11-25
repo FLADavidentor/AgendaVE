@@ -59,4 +59,9 @@ public class TipoActividadController {
     public List<TipoActividadDTO> buscarPorFacultadEncargada(@PathVariable String facultad) {
         return tipoActividadService.buscarPorFacultadEncargada(facultad);
     }
+    @GetMapping("/search-by-name-partial")
+    public List<TipoActividadDTO> buscarPorNombreParcial(@RequestParam String parteDelNombre) {
+        return tipoActividadService.buscarPorNombreParcial(parteDelNombre);
+    }
+
 }

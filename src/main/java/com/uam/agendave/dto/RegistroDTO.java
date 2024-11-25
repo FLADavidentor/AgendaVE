@@ -16,3 +16,4 @@ public class RegistroDTO {
     private UUID idEstudiante;
     private UUID idActividad;
 }
+

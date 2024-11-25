@@ -1,6 +1,7 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.DetalleAsistenciaDTO;
+import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.DetalleAsistencia;
 import com.uam.agendave.model.EstadoAsistencia;
 import com.uam.agendave.service.DetalleAsistenciaService;
@@ -37,18 +38,20 @@ public class DetalleAsistenciaController {
         if (asistenciaService.buscarPorId(detalleAsistenciaDTO.getIdAsistencia()) == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (registroService.buscarPorId(detalleAsistenciaDTO.getIdRegistro()) == null) {
+        RegistroDTO registroDTO = registroService.buscarPorId(detalleAsistenciaDTO.getIdRegistro());
+        if (registroDTO == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         DetalleAsistencia detalleAsistencia = new DetalleAsistencia();
         detalleAsistencia.setEstadoAsistencia(estadoAsistencia);
         detalleAsistencia.setAsistencia(asistenciaService.buscarPorId(detalleAsistenciaDTO.getIdAsistencia()));
-        detalleAsistencia.setRegistro(registroService.buscarPorId(detalleAsistenciaDTO.getIdRegistro()));
+        detalleAsistencia.setRegistro(registroService.convertirADetalleAsistencia(registroDTO)); // Conversión a Registro
 
         DetalleAsistencia savedDetalle = detalleAsistenciaService.guardarDetalleAsistencia(detalleAsistencia);
         return new ResponseEntity<>(savedDetalle, HttpStatus.CREATED);
     }
+
 
     // Obtener todos los DetalleAsistencia
     @GetMapping

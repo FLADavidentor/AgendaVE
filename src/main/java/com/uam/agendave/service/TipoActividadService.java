@@ -12,4 +12,5 @@ public interface TipoActividadService {
     void eliminarTipoActividad(UUID id);
     List<TipoActividadDTO> buscarPorNombre(String nombreTipo);
     List<TipoActividadDTO> buscarPorFacultadEncargada(String facultad);
+    List<TipoActividadDTO> buscarPorNombreParcial(String parteDelNombre);
 }

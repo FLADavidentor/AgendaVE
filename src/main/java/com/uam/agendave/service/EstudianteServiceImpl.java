@@ -67,24 +67,26 @@ public class EstudianteServiceImpl implements EstudianteService {
         EstudianteDTO estudianteDTO = new EstudianteDTO();
         estudianteDTO.setId(estudiante.getId());
         estudianteDTO.setNombre(estudiante.getNombre());
+        estudianteDTO.setNombre2(estudiante.getNombre2());
         estudianteDTO.setApellido(estudiante.getApellido());
+        estudianteDTO.setApellido2(estudiante.getApellido2());
         estudianteDTO.setCorreo(estudiante.getCorreo());
         estudianteDTO.setNumeroTelefono(estudiante.getNumeroTelefono());
         estudianteDTO.setCif(estudiante.getCif());
-        // Agregar otros campos según necesidad
         return estudianteDTO;
     }
 
-    // Método para convertir de EstudianteDTO a Estudiante
     private Estudiante convertirAEntidad(EstudianteDTO estudianteDTO) {
         Estudiante estudiante = new Estudiante();
         estudiante.setId(estudianteDTO.getId());
         estudiante.setNombre(estudianteDTO.getNombre());
+        estudiante.setNombre2(estudianteDTO.getNombre2());
         estudiante.setApellido(estudianteDTO.getApellido());
+        estudiante.setApellido2(estudianteDTO.getApellido2());
         estudiante.setCorreo(estudianteDTO.getCorreo());
         estudiante.setNumeroTelefono(estudianteDTO.getNumeroTelefono());
         estudiante.setCif(estudianteDTO.getCif());
-        // Agregar otros campos según necesidad
         return estudiante;
     }
+
 }

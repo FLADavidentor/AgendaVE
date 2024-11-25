@@ -1,15 +1,15 @@
 package com.uam.agendave.service;
 
-import com.uam.agendave.model.Usuario;
+import com.uam.agendave.dto.UsuarioDTO;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface UsuarioService {
-    List<Usuario> obtenerTodos();
-    Usuario guardarUsuario(Usuario usuario);
-    Usuario buscarPorId(UUID id);
+    List<UsuarioDTO> obtenerTodos();
+    UsuarioDTO guardarUsuario(UsuarioDTO usuarioDTO);
+    UsuarioDTO buscarPorId(UUID id);
     void eliminarUsuario(UUID id);
-    List<Usuario> buscarPorNombre(String nombre);
-    Usuario buscarPorCorreo(String correo);
+    List<UsuarioDTO> buscarPorNombre(String nombre);
+    UsuarioDTO buscarPorCorreo(String correo);
 }
