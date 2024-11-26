@@ -2,8 +2,10 @@ package com.uam.agendave.service;
 
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.model.Actividad;
+import com.uam.agendave.model.TipoConvalidacion;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface ActividadService {
@@ -22,5 +24,9 @@ public interface ActividadService {
 
     List<ActividadDTO> buscarPorLugar(UUID idLugar);
 
+
     List<ActividadDTO> buscarActividadesConCupoDisponible(); // Ajustado para no requerir el parámetro cupo
+    Map<TipoConvalidacion, Integer> obtenerConvalidacionesPorActividad(UUID id);
+    Integer obtenerTotalConvalidacionesMaximas(UUID id);
+
 }

@@ -113,6 +113,27 @@ public class ActividadServiceImpl implements ActividadService {
                 .map(this::convertirAModelDTO)
                 .collect(Collectors.toList());
     }
+    @Override
+    public Map<TipoConvalidacion, Integer> obtenerConvalidacionesPorActividad(UUID id) {
+        List<Object[]> resultados = actividadRepository.findConvalidacionesById(id);
+
+        // Convertir la lista en un mapa
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        resultado -> (TipoConvalidacion) resultado[0], // Clave (TipoConvalidacion)
+                        resultado -> (Integer) resultado[1]           // Valor (cantidadPermitida)
+                ));
+    }
+
+
+    @Override
+    public Integer obtenerTotalConvalidacionesMaximas(UUID id) {
+        Actividad actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
+        return actividad.getTotalConvalidacionesPermitidas();
+    }
+
+
 
     // Métodos de conversión
 

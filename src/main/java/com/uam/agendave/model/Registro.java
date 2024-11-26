@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Entity
@@ -13,36 +12,53 @@ import java.util.Map;
 @Setter
 public class Registro extends Identifiable {
 
-    private boolean convalidacion;
-    private boolean transporte;
+    private boolean convalidacion; // Indica si el registro incluye convalidación
+    private boolean transporte;    // Indica si el estudiante usará transporte
 
     @ManyToOne
     @JoinColumn(name = "idEstudiante", nullable = false)
-    private Estudiante estudiante;
+    private Estudiante estudiante; // Relación con el estudiante
 
     @ManyToOne
     @JoinColumn(name = "idActividad", nullable = false)
-    private Actividad actividad;
+    private Actividad actividad;   // Relación con la actividad
 
-    @Enumerated(EnumType.STRING)
-    private TipoConvalidacion tipoConvalidacion;
+    @ElementCollection
+    @CollectionTable(name = "registro_convalidaciones", joinColumns = @JoinColumn(name = "idRegistro"))
+    @MapKeyColumn(name = "tipoConvalidacion") // Enum como clave
+    @Column(name = "cantidad")
+    @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
+    private Map<TipoConvalidacion, Integer> convalidacionesRealizadas; // Créditos convalidados por tipo
 
+    @Column(name = "totalConvalidado")
+    private int totalConvalidado; // Créditos totales convalidados por el estudiante en esta actividad
+
+    /**
+     * Valida que las convalidaciones realizadas no excedan los límites permitidos
+     * definidos en la actividad para cada tipo y en total.
+     */
     public void validarConvalidacion() {
         if (convalidacion) {
-            Map<TipoConvalidacion, Integer> convalidaciones = actividad.getConvalidacionesPermitidas();
-            Integer totalPermitido = actividad.getTotalConvalidacionesPermitidas();
+            // Obtener los límites directamente desde la actividad
+            Map<TipoConvalidacion, Integer> limitesConvalidacion = actividad.getConvalidacionesPermitidas();
+            Integer limiteTotal = actividad.getTotalConvalidacionesPermitidas();
 
-            if (convalidaciones == null || convalidaciones.isEmpty() || totalPermitido == null || totalPermitido <= 0) {
+            // Validar si la actividad permite convalidaciones
+            if (limitesConvalidacion == null || limitesConvalidacion.isEmpty() || limiteTotal == null || limiteTotal <= 0) {
                 throw new IllegalStateException("La actividad no permite convalidaciones.");
             }
 
-            int usados = actividad.getRegistros() == null ? 0 : actividad.getRegistros().stream()
-                    .filter(Registro::isConvalidacion)
-                    .mapToInt(r -> convalidaciones.getOrDefault(r.getTipoConvalidacion(), 0))
-                    .sum();
+            // Validar límites por tipo de convalidación
+            convalidacionesRealizadas.forEach((tipo, cantidad) -> {
+                int limiteTipo = limitesConvalidacion.getOrDefault(tipo, 0);
+                if (cantidad > limiteTipo) {
+                    throw new IllegalStateException("Excedido el límite para el tipo de convalidación: " + tipo);
+                }
+            });
 
-            if (usados >= totalPermitido) {
-                throw new IllegalStateException("Se ha alcanzado el límite total de convalidaciones para esta actividad.");
+            // Validar límite total
+            if (totalConvalidado > limiteTotal) {
+                throw new IllegalStateException("Excedido el límite total de convalidaciones permitidas para esta actividad.");
             }
         }
     }

@@ -2,11 +2,14 @@ package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.model.Actividad;
+import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -58,6 +61,21 @@ public class ActividadController {
     public ResponseEntity<Void> eliminarActividad(@PathVariable UUID id) {
         actividadService.eliminarActividad(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/{id}/convalidaciones")
+    public ResponseEntity<Map<TipoConvalidacion, Integer>> obtenerConvalidaciones(@PathVariable UUID id) {
+        try {
+            Map<TipoConvalidacion, Integer> convalidaciones = actividadService.obtenerConvalidacionesPorActividad(id);
+            return ResponseEntity.ok(convalidaciones);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+    @GetMapping("/{id}/convalidaciones/total")
+    public ResponseEntity<Integer> obtenerTotalConvalidaciones(@PathVariable UUID id) {
+        return ResponseEntity.ok(actividadService.obtenerTotalConvalidacionesMaximas(id));
     }
 
     // Buscar actividades con cupo disponible
