@@ -14,7 +14,5 @@ public interface NombreActividadRepository extends JpaRepository<NombreActividad
     // Buscar por parte del nombre (case-insensitive)
     List<NombreActividad> findByNombreContainingIgnoreCase(String nombre);
 
-    // Buscar por tipo de actividad
-    List<NombreActividad> findByTipoActividadId(UUID idTipoActividad);
 
 }

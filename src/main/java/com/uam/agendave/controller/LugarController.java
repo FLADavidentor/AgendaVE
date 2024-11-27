@@ -18,13 +18,13 @@ public class LugarController {
         this.lugarService = lugarService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<LugarDTO>> obtenerTodos() {
         List<LugarDTO> lugares = lugarService.obtenerTodos();
         return ResponseEntity.ok(lugares);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<LugarDTO> guardarLugar(@RequestBody LugarDTO lugarDTO) {
         LugarDTO lugarGuardado = lugarService.guardarLugar(lugarDTO);
         return ResponseEntity.ok(lugarGuardado);
@@ -36,7 +36,7 @@ public class LugarController {
         return ResponseEntity.ok(lugarDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminarLugar(@PathVariable UUID id) {
         lugarService.eliminarLugar(id);
         return ResponseEntity.noContent().build();

@@ -33,35 +33,6 @@ public class Registro extends Identifiable {
     @Column(name = "totalConvalidado")
     private int totalConvalidado; // Créditos totales convalidados por el estudiante en esta actividad
 
-    /**
-     * Valida que las convalidaciones realizadas no excedan los límites permitidos
-     * definidos en la actividad para cada tipo y en total.
-     */
-    public void validarConvalidacion() {
-        if (convalidacion) {
-            // Obtener los límites directamente desde la actividad
-            Map<TipoConvalidacion, Integer> limitesConvalidacion = actividad.getConvalidacionesPermitidas();
-            Integer limiteTotal = actividad.getTotalConvalidacionesPermitidas();
-
-            // Validar si la actividad permite convalidaciones
-            if (limitesConvalidacion == null || limitesConvalidacion.isEmpty() || limiteTotal == null || limiteTotal <= 0) {
-                throw new IllegalStateException("La actividad no permite convalidaciones.");
-            }
-
-            // Validar límites por tipo de convalidación
-            convalidacionesRealizadas.forEach((tipo, cantidad) -> {
-                int limiteTipo = limitesConvalidacion.getOrDefault(tipo, 0);
-                if (cantidad > limiteTipo) {
-                    throw new IllegalStateException("Excedido el límite para el tipo de convalidación: " + tipo);
-                }
-            });
-
-            // Validar límite total
-            if (totalConvalidado > limiteTotal) {
-                throw new IllegalStateException("Excedido el límite total de convalidaciones permitidas para esta actividad.");
-            }
-        }
     }
-}
 
 

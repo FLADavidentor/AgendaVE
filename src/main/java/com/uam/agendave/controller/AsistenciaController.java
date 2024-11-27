@@ -25,7 +25,7 @@ public class AsistenciaController {
     }
 
     // Obtener todas las asistencias
-    @GetMapping
+    @GetMapping("/all")
     public List<Asistencia> obtenerTodas() {
         return asistenciaService.obtenerTodas();
     }
@@ -45,7 +45,7 @@ public class AsistenciaController {
     }
 
     // Crear nueva asistencia
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Asistencia> crearAsistencia(@RequestBody AsistenciaDTO asistenciaDTO) {
         // Convertir DTO a entidad
         Asistencia nuevaAsistencia = new Asistencia();
@@ -62,7 +62,7 @@ public class AsistenciaController {
     }
 
     // Eliminar asistencia por ID
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminarAsistencia(@PathVariable UUID id) {
         asistenciaService.eliminarAsistencia(id);
         return ResponseEntity.noContent().build();

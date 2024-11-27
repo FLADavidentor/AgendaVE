@@ -20,7 +20,7 @@ public class RegistroController {
         this.registroService = registroService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<RegistroDTO> obtenerTodos() {
         return registroService.obtenerTodos();
     }
@@ -43,7 +43,7 @@ public class RegistroController {
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
         registroService.eliminarRegistro(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

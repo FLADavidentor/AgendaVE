@@ -27,10 +27,6 @@ public class NombreActividadServiceImpl implements NombreActividadService {
     }
 
     @Override
-    public List<NombreActividad> buscarPorTipoActividad(UUID idTipoActividad) {
-        return nombreActividadRepository.findByTipoActividadId(idTipoActividad);
-    }
-    @Override
     public NombreActividad guardar(NombreActividad nombreActividad) {
         return nombreActividadRepository.save(nombreActividad);
     }

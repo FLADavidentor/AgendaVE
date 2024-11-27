@@ -19,13 +19,13 @@ public class UsuarioController {
     }
 
     // Obtener todos los usuarios
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<UsuarioDTO>> obtenerTodos() {
         return ResponseEntity.ok(usuarioService.obtenerTodos());
     }
 
     // Crear un nuevo usuario
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<UsuarioDTO> guardarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         UsuarioDTO nuevoUsuario = usuarioService.guardarUsuario(usuarioDTO);
         return ResponseEntity.ok(nuevoUsuario);
@@ -53,7 +53,7 @@ public class UsuarioController {
     }
 
     // Eliminar un usuario por ID
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable UUID id) {
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build();

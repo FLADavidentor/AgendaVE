@@ -54,7 +54,7 @@ public class DetalleAsistenciaController {
 
 
     // Obtener todos los DetalleAsistencia
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<DetalleAsistencia>> obtenerTodos() {
         List<DetalleAsistencia> detalles = detalleAsistenciaService.obtenerTodos();
         return new ResponseEntity<>(detalles, HttpStatus.OK);

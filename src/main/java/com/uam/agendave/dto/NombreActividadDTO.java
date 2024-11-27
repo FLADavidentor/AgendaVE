@@ -11,5 +11,4 @@ public class NombreActividadDTO {
 
     private UUID id;
     private String nombre;
-    private UUID idTipoActividad;
 }

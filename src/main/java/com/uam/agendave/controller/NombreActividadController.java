@@ -19,11 +19,9 @@ import java.util.stream.Collectors;
 public class NombreActividadController {
 
     private final NombreActividadService nombreActividadService;
-    private final TipoActividadService tipoActividadService;
 
     public NombreActividadController(NombreActividadService nombreActividadService, TipoActividadService tipoActividadService) {
         this.nombreActividadService = nombreActividadService;
-        this.tipoActividadService = tipoActividadService;
     }
 
     // Obtener todas las actividades por nombre exacto
@@ -44,15 +42,6 @@ public class NombreActividadController {
                 .collect(Collectors.toList()));
     }
 
-    // Buscar actividades por TipoActividad (usando ID)
-    @GetMapping("/buscar-por-tipo")
-    public ResponseEntity<List<NombreActividadDTO>> buscarPorTipoActividad(@RequestParam UUID idTipoActividad) {
-        List<NombreActividad> actividades = nombreActividadService.buscarPorTipoActividad(idTipoActividad);
-        return ResponseEntity.ok(actividades.stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList()));
-    }
-
     // Crear una nueva NombreActividad
     @PostMapping
     public ResponseEntity<NombreActividadDTO> crearNombreActividad(@RequestBody NombreActividadDTO nombreActividadDTO) {
@@ -66,9 +55,6 @@ public class NombreActividadController {
         NombreActividadDTO dto = new NombreActividadDTO();
         dto.setId(nombreActividad.getId());
         dto.setNombre(nombreActividad.getNombre());
-        if (nombreActividad.getTipoActividad() != null) {
-            dto.setIdTipoActividad(nombreActividad.getTipoActividad().getId());
-        }
         return dto;
     }
 
@@ -77,22 +63,7 @@ public class NombreActividadController {
         nombreActividad.setId(dto.getId());
         nombreActividad.setNombre(dto.getNombre());
 
-        // Convierte el DTO a TipoActividad y lo asigna
-        if (dto.getIdTipoActividad() != null) {
-            TipoActividadDTO tipoActividadDTO = tipoActividadService.buscarPorId(dto.getIdTipoActividad());
-            TipoActividad tipoActividad = convertirTipoActividadADominio(tipoActividadDTO);
-            nombreActividad.setTipoActividad(tipoActividad);
-        }
-
         return nombreActividad;
     }
 
-    // Método auxiliar para convertir TipoActividadDTO a TipoActividad
-    private TipoActividad convertirTipoActividadADominio(TipoActividadDTO tipoActividadDTO) {
-        TipoActividad tipoActividad = new TipoActividad();
-        tipoActividad.setId(tipoActividadDTO.getId());
-        tipoActividad.setNombreTipo(tipoActividadDTO.getNombreTipo());
-        tipoActividad.setFacultadEncargada(tipoActividadDTO.getFacultadEncargada());
-        return tipoActividad;
-    }
 }

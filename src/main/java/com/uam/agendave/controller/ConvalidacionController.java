@@ -28,7 +28,7 @@ public class ConvalidacionController {
         return ResponseEntity.ok(convalidacionService.obtenerPorActividad(idActividad));
     }
 
-    @PostMapping("/{idDetalleAsistencia}")
+    @PostMapping("/convalidar/{idDetalleAsistencia}")
     public ResponseEntity<Void> convalidar(@PathVariable UUID idDetalleAsistencia) {
         convalidacionService.convalidarCreditos(idDetalleAsistencia);
         return ResponseEntity.ok().build();

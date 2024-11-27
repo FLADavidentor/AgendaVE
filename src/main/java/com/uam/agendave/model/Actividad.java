@@ -41,6 +41,9 @@ public class Actividad extends Identifiable {
     @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas;
 
+//    @ElementCollection
+//    private List<Integer> detalleConvalidacion;
+
     private Integer totalConvalidacionesPermitidas;
 
     @OneToMany(mappedBy = "actividad")

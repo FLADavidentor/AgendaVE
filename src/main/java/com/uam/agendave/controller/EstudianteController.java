@@ -17,7 +17,7 @@ public class EstudianteController {
         this.estudianteService = estudianteService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<EstudianteDTO> obtenerTodos() {
         return estudianteService.obtenerTodos();
     }
