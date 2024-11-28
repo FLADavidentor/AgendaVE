@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ConvalidacionRepository extends JpaRepository<Convalidacion, UUID> {
-    List<Convalidacion> findByEstudianteId(UUID estudianteId);
+    List<Convalidacion> findByCif(String estudianteId);
     List<Convalidacion> findByActividadId(UUID actividadId);
 }

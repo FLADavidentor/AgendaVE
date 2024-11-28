@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public interface ConvalidacionService {
     void convalidarCreditos(UUID idDetalleAsistencia); // Reglas de negocio principales
-    List<ConvalidacionDTO> obtenerPorEstudiante(UUID idEstudiante); // Consultar créditos por estudiante
+    List<ConvalidacionDTO> obtenerPorEstudiante(String idEstudiante); // Consultar créditos por estudiante
     List<ConvalidacionDTO> obtenerPorActividad(UUID idActividad);   // Consultar créditos por actividad
 }

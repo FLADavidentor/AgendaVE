@@ -50,7 +50,7 @@ public class RegistroController {
     }
 
     @GetMapping("/estudiante/{idEstudiante}")
-    public List<RegistroDTO> obtenerPorEstudiante(@PathVariable UUID idEstudiante) {
+    public List<RegistroDTO> obtenerPorEstudiante(@PathVariable String idEstudiante) {
         return registroService.buscarPorEstudiante(idEstudiante);
     }
 

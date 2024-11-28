@@ -19,7 +19,7 @@ public class ConvalidacionController {
     }
 
     @GetMapping("/estudiante/{idEstudiante}")
-    public ResponseEntity<List<ConvalidacionDTO>> obtenerPorEstudiante(@PathVariable UUID idEstudiante) {
+    public ResponseEntity<List<ConvalidacionDTO>> obtenerPorEstudiante(@PathVariable String idEstudiante) {
         return ResponseEntity.ok(convalidacionService.obtenerPorEstudiante(idEstudiante));
     }
 

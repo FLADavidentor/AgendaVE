@@ -2,11 +2,9 @@ package com.uam.agendave.service;
 
 import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.Actividad;
-import com.uam.agendave.model.Estudiante;
 import com.uam.agendave.model.Registro;
 import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.repository.ActividadRepository;
-import com.uam.agendave.repository.EstudianteRepository;
 import com.uam.agendave.repository.RegistroRepository;
 import org.springframework.stereotype.Service;
 
@@ -42,25 +40,16 @@ public class RegistroServiceImpl implements RegistroService {
 
         // Validar las convalidaciones realizadas
         if (registroDTO.isConvalidacion() && registroDTO.getConvalidacionesRealizadas() != null) {
-            // Obtener la actividad asociada al registro
             Actividad actividad = actividadRepository.findById(registroDTO.getIdActividad())
                     .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + registroDTO.getIdActividad()));
-
-            // Validar las convalidaciones contra los límites
             validarConvalidaciones(registroDTO, actividad);
-
-            // Calcular el total de convalidaciones realizadas
             int totalConvalidado = registroDTO.getConvalidacionesRealizadas().values().stream().mapToInt(Integer::intValue).sum();
             registro.setTotalConvalidado(totalConvalidado);
         }
 
-        // Guardar el registro en la base de datos
         Registro nuevoRegistro = registroRepository.save(registro);
-
-        // Retornar el DTO generado
         return convertirADTO(nuevoRegistro);
     }
-
 
     @Override
     public RegistroDTO buscarPorId(UUID id) {
@@ -78,8 +67,8 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    public List<RegistroDTO> buscarPorEstudiante(UUID idEstudiante) {
-        return registroRepository.findByEstudianteId(idEstudiante)
+    public List<RegistroDTO> buscarPorEstudiante(String cif) {
+        return registroRepository.findByCif(cif)
                 .stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
@@ -93,6 +82,31 @@ public class RegistroServiceImpl implements RegistroService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Registro convertirADetalleAsistencia(RegistroDTO registroDTO) {
+        Registro registro = new Registro();
+        registro.setId(registroDTO.getId());
+        registro.setConvalidacion(registroDTO.isConvalidacion());
+        registro.setTransporte(registroDTO.isTransporte());
+
+        if (registroDTO.getIdEstudiante() != null) {
+            registro.setCif(registroDTO.getIdEstudiante()); // Asigna directamente el CIF
+        }
+
+        if (registroDTO.getIdActividad() != null) {
+            Actividad actividad = new Actividad();
+            actividad.setId(registroDTO.getIdActividad());
+            registro.setActividad(actividad);
+        }
+
+        if (registroDTO.isConvalidacion() && registroDTO.getConvalidacionesRealizadas() != null) {
+            registro.setConvalidacionesRealizadas(new HashMap<>(registroDTO.getConvalidacionesRealizadas()));
+        }
+
+        return registro;
+    }
+
+
     private Registro convertirAEntidad(RegistroDTO registroDTO) {
         Registro registro = new Registro();
         registro.setId(registroDTO.getId());
@@ -100,9 +114,7 @@ public class RegistroServiceImpl implements RegistroService {
         registro.setTransporte(registroDTO.isTransporte());
 
         if (registroDTO.getIdEstudiante() != null) {
-            Estudiante estudiante = new Estudiante();
-            estudiante.setId(registroDTO.getIdEstudiante());
-            registro.setEstudiante(estudiante);
+            registro.setCif(registroDTO.getIdEstudiante()); // Asigna directamente el CIF
         }
 
         if (registroDTO.getIdActividad() != null) {
@@ -147,13 +159,12 @@ public class RegistroServiceImpl implements RegistroService {
         registroDTO.setTotalConvalidado(totalRealizado);
     }
 
-
     private RegistroDTO convertirADTO(Registro registro) {
         RegistroDTO registroDTO = new RegistroDTO();
         registroDTO.setId(registro.getId());
         registroDTO.setConvalidacion(registro.isConvalidacion());
         registroDTO.setTransporte(registro.isTransporte());
-        registroDTO.setIdEstudiante(registro.getEstudiante().getId());
+        registroDTO.setIdEstudiante(registro.getCif());
         registroDTO.setIdActividad(registro.getActividad().getId());
         registroDTO.setTotalConvalidado(registro.getTotalConvalidado());
 
@@ -163,28 +174,4 @@ public class RegistroServiceImpl implements RegistroService {
 
         return registroDTO;
     }
-
-    @Override
-    public Registro convertirADetalleAsistencia(RegistroDTO registroDTO) {
-        Registro registro = new Registro();
-        registro.setId(registroDTO.getId());
-        registro.setConvalidacion(registroDTO.isConvalidacion());
-        registro.setTransporte(registroDTO.isTransporte());
-
-        if (registroDTO.getIdEstudiante() != null) {
-            Estudiante estudiante = new Estudiante();
-            estudiante.setId(registroDTO.getIdEstudiante());
-            registro.setEstudiante(estudiante);
-        }
-
-        if (registroDTO.getIdActividad() != null) {
-            Actividad actividad = new Actividad();
-            actividad.setId(registroDTO.getIdActividad());
-            registro.setActividad(actividad);
-        }
-
-        return registro;
-    }
-
 }
-

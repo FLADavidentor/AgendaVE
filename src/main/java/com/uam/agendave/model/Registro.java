@@ -15,9 +15,8 @@ public class Registro extends Identifiable {
     private boolean convalidacion; // Indica si el registro incluye convalidación
     private boolean transporte;    // Indica si el estudiante usará transporte
 
-    @ManyToOne
-    @JoinColumn(name = "idEstudiante", nullable = false)
-    private Estudiante estudiante; // Relación con el estudiante
+    @Column(nullable = false)
+    private String cif; // Almacena el CIF del estudiante
 
     @ManyToOne
     @JoinColumn(name = "idActividad", nullable = false)

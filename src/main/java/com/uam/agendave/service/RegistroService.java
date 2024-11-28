@@ -16,7 +16,7 @@ public interface RegistroService {
 
     void eliminarRegistro(UUID id);
 
-    List<RegistroDTO> buscarPorEstudiante(UUID idEstudiante);
+    List<RegistroDTO> buscarPorEstudiante(String cif);
 
     List<RegistroDTO> buscarPorActividad(UUID idActividad);
     Registro convertirADetalleAsistencia(RegistroDTO registroDTO);

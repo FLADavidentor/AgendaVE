@@ -74,6 +74,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         return convertirADTO(usuario);
     }
 
+    @Override
+    public String autenticarUsuario(String username, String password) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con username: " + username));
+
+        // Verificar la contraseña
+        if (!passwordEncoder.matches(password, usuario.getContrasena())) {
+            throw new IllegalArgumentException("Contraseña incorrecta para el usuario: " + username);
+        }
+
+        // Generar un token ficticio (puedes reemplazarlo con un token JWT real si lo necesitas)
+        return "Bearer " + UUID.randomUUID();
+    }
+
     // Método privado para convertir DTO a entidad
     private Usuario convertirAEntidad(UsuarioDTO usuarioDTO) {
         Usuario usuario = new Usuario();

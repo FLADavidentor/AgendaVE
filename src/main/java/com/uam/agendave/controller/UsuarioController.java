@@ -1,15 +1,21 @@
 package com.uam.agendave.controller;
 
+import com.uam.agendave.dto.LoginRequest;
+import com.uam.agendave.dto.LoginRequestUser;
 import com.uam.agendave.dto.UsuarioDTO;
 import com.uam.agendave.service.UsuarioService;
+import com.uam.agendave.util.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/usuario")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -18,44 +24,14 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    // Obtener todos los usuarios
-    @GetMapping("/all")
-    public ResponseEntity<List<UsuarioDTO>> obtenerTodos() {
-        return ResponseEntity.ok(usuarioService.obtenerTodos());
+    @PostMapping("/login")
+    public ResponseEntity<String> autenticarUsuario(@RequestBody LoginRequestUser loginRequestUser) {
+        String token = usuarioService.autenticarUsuario(loginRequestUser.getUsername(), loginRequestUser.getPassword());
+        return ResponseEntity.ok(token);
     }
-
-    // Crear un nuevo usuario
     @PostMapping("/create")
-    public ResponseEntity<UsuarioDTO> guardarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         UsuarioDTO nuevoUsuario = usuarioService.guardarUsuario(usuarioDTO);
-        return ResponseEntity.ok(nuevoUsuario);
-    }
-
-    // Buscar usuario por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable UUID id) {
-        UsuarioDTO usuario = usuarioService.buscarPorId(id);
-        return ResponseEntity.ok(usuario);
-    }
-
-    // Buscar usuarios por nombre
-    @GetMapping("/buscar-por-nombre")
-    public ResponseEntity<List<UsuarioDTO>> buscarPorNombre(@RequestParam String nombre) {
-        List<UsuarioDTO> usuarios = usuarioService.buscarPorNombre(nombre);
-        return ResponseEntity.ok(usuarios);
-    }
-
-    // Buscar usuario por correo
-    @GetMapping("/buscar-por-correo")
-    public ResponseEntity<UsuarioDTO> buscarPorCorreo(@RequestParam String correo) {
-        UsuarioDTO usuario = usuarioService.buscarPorCorreo(correo);
-        return ResponseEntity.ok(usuario);
-    }
-
-    // Eliminar un usuario por ID
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable UUID id) {
-        usuarioService.eliminarUsuario(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 }

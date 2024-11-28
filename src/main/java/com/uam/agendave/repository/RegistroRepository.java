@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface RegistroRepository extends JpaRepository<Registro, UUID> {
 
-    List<Registro> findByEstudianteId(UUID idEstudiante);
+    List<Registro> findByCif(String cif);
 
     @Query("SELECT r FROM Registro r WHERE r.actividad.id = :idActividad")
     List<Registro> findByActividadId(@Param("idActividad") UUID idActividad);

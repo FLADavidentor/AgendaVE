@@ -6,18 +6,17 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Entity
 @Getter
 @Setter
-public class Estudiante extends Identifiable{
-    private String nombre;
-    private String nombre2;
-    private String apellido;
-    private String apellido2;
-    private String correo;
-    private String numeroTelefono;
+public class Estudiante {
     private String cif;
-
-    @OneToMany(mappedBy = "estudiante", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Registro> registros;
+    private String nombres;
+    private String apellidos;
+    private String tipo;
+    private String correo;
+    private String sexo;
+    private String telefono;
+    private String carrera;
+    private String facultad;
 }
+

@@ -1,14 +1,16 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.EstudianteDTO;
+import com.uam.agendave.dto.LoginRequest;
+import com.uam.agendave.model.Estudiante;
 import com.uam.agendave.service.EstudianteService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/estudiantes")
+@RequestMapping("/estudiante")
 public class EstudianteController {
 
     private final EstudianteService estudianteService;
@@ -17,29 +19,22 @@ public class EstudianteController {
         this.estudianteService = estudianteService;
     }
 
-    @GetMapping("/all")
-    public List<EstudianteDTO> obtenerTodos() {
-        return estudianteService.obtenerTodos();
+    @PostMapping("/login")
+    public ResponseEntity<String> autenticarEstudiante(@RequestBody LoginRequest loginRequest) {
+        String token = estudianteService.autenticarEstudiante(loginRequest.getCif(), loginRequest.getPassword());
+        return ResponseEntity.ok(token);
     }
 
-    @GetMapping("/{id}")
-    public EstudianteDTO obtenerPorId(@PathVariable UUID id) {
-        return estudianteService.buscarPorId(id);
-    }
+    @GetMapping("/{cif}")
+    public ResponseEntity<Estudiante> obtenerInformacionEstudiante(
+            @PathVariable String cif, @RequestHeader("Authorization") String token) {
 
-    @PostMapping
-    public EstudianteDTO crearEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
-        return estudianteService.guardarEstudiante(estudianteDTO);
-    }
+        // Logs de entrada
+        System.out.println("CIF recibido: " + cif);
+        System.out.println("Token recibido en header: " + token);
 
-    @PutMapping("/{id}")
-    public EstudianteDTO actualizarEstudiante(@PathVariable UUID id, @RequestBody EstudianteDTO estudianteDTO) {
-        estudianteDTO.setId(id);
-        return estudianteService.guardarEstudiante(estudianteDTO);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminarEstudiante(@PathVariable UUID id) {
-        estudianteService.eliminarEstudiante(id);
+        Estudiante estudiante = estudianteService.obtenerInformacionEstudiante(cif, token);
+        return ResponseEntity.ok(estudiante);
     }
 }
+

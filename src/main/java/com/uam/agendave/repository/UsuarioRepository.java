@@ -11,5 +11,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
     // Agrega métodos personalizados si son necesarios
     List<Usuario> findByNombreContainingIgnoreCase(String nombre); // Búsqueda por nombre parcial
     Optional<Usuario> findByCorreoIgnoreCase(String correo);      // Búsqueda exacta por correo
-
+    Optional<Usuario> findByUsername(String username);
 }

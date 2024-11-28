@@ -9,7 +9,7 @@ import java.util.UUID;
 @Setter
 public class ConvalidacionDTO {
     private UUID id;
-    private UUID idEstudiante;
+    private String idEstudiante;
     private UUID idActividad;
     private int creditosConvalidados;
 }

@@ -12,4 +12,5 @@ public interface UsuarioService {
     void eliminarUsuario(UUID id);
     List<UsuarioDTO> buscarPorNombre(String nombre);
     UsuarioDTO buscarPorCorreo(String correo);
+    String autenticarUsuario(String username, String password);
 }

@@ -11,9 +11,8 @@ import java.util.UUID;
 @Setter
 public class Convalidacion extends Identifiable {
 
-    @ManyToOne
-    @JoinColumn(name = "idEstudiante", nullable = false)
-    private Estudiante estudiante;
+    @Column(nullable = false)
+    private String cif; // Almacena el CIF del estudiante
 
     @ManyToOne
     @JoinColumn(name = "idActividad", nullable = false)

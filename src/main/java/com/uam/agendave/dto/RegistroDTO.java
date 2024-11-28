@@ -15,7 +15,7 @@ public class RegistroDTO {
     private UUID id;
     private boolean convalidacion;
     private boolean transporte;
-    private UUID idEstudiante;
+    private String idEstudiante;
     private UUID idActividad;
     @JsonDeserialize(keyUsing = TipoConvalidacionKeyDeserializer.class)
     private Map<TipoConvalidacion, Integer> convalidacionesRealizadas;

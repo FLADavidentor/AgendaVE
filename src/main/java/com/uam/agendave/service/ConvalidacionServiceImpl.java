@@ -1,4 +1,4 @@
-package com.uam.agendave.service.impl;
+package com.uam.agendave.service;
 
 import com.uam.agendave.dto.ConvalidacionDTO;
 import com.uam.agendave.model.Convalidacion;
@@ -48,7 +48,7 @@ public class ConvalidacionServiceImpl implements ConvalidacionService {
 
             if (usados < registro.getActividad().getTotalConvalidacionesPermitidas()) {
                 Convalidacion nuevaConvalidacion = new Convalidacion();
-                nuevaConvalidacion.setEstudiante(registro.getEstudiante());
+                nuevaConvalidacion.setCif(registro.getCif()); // Usa el CIF directamente
                 nuevaConvalidacion.setActividad(registro.getActividad());
                 nuevaConvalidacion.setCreditosConvalidados(1);
 
@@ -58,8 +58,8 @@ public class ConvalidacionServiceImpl implements ConvalidacionService {
     }
 
     @Override
-    public List<ConvalidacionDTO> obtenerPorEstudiante(UUID idEstudiante) {
-        return convalidacionRepository.findByEstudianteId(idEstudiante)
+    public List<ConvalidacionDTO> obtenerPorEstudiante(String idEstudiante) {
+        return convalidacionRepository.findByCif(idEstudiante)
                 .stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
@@ -77,7 +77,7 @@ public class ConvalidacionServiceImpl implements ConvalidacionService {
     private ConvalidacionDTO convertirADTO(Convalidacion convalidacion) {
         ConvalidacionDTO dto = new ConvalidacionDTO();
         dto.setId(convalidacion.getId());
-        dto.setIdEstudiante(convalidacion.getEstudiante().getId());
+        dto.setIdEstudiante(convalidacion.getCif());
         dto.setIdActividad(convalidacion.getActividad().getId());
         dto.setCreditosConvalidados(convalidacion.getCreditosConvalidados());
         return dto;
