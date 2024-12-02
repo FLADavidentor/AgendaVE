@@ -1,10 +1,12 @@
 package com.uam.agendave.service;
 
+import com.uam.agendave.dto.LoginRequest;
 import com.uam.agendave.model.Estudiante;
 import com.uam.agendave.util.ApiResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -23,13 +25,13 @@ public class EstudianteServiceImpl implements EstudianteService {
     }
 
     @Override
-    public String autenticarEstudiante(String cif, String password) {
+    public String autenticarEstudiante(LoginRequest loginRequest) {
         String loginUrl = BASE_URL + "login";
 
         // Crear el cuerpo de la solicitud
         Map<String, String> requestBody = Map.of(
-                "cif", cif,
-                "password", password
+                "cif", loginRequest.getCif(),
+                "password", loginRequest.getPassword()
         );
 
         try {
@@ -61,42 +63,26 @@ public class EstudianteServiceImpl implements EstudianteService {
     }
 
     @Override
-    public Estudiante obtenerInformacionEstudiante(String cif, String token) {
-        String infoUrl = BASE_URL + "GetStudentInformation?cif=" + cif;
-
-        // Verifica si el token ya incluye el prefijo "Bearer"
-        if (!token.startsWith("Bearer ")) {
-            token = "Bearer " + token;
-        }
+    public String obtenerInformacionEstudiante(String token, LoginRequest loginRequest) {
+        String infoUrl = BASE_URL + "GetStudentInformation?cif=" + loginRequest.getCif();
 
         try {
-            // Realizar la solicitud GET con RestClient
-            ApiResponse apiResponse = restClient.method(HttpMethod.GET)
+            // Solicitud GET para obtener información del estudiante
+            ResponseEntity<String> response = restClient.get()
                     .uri(infoUrl)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
-                    .body(ApiResponse.class);
+                    .toEntity(String.class);
 
-            // Mapear el primer elemento de "data" a un Estudiante
-            if (apiResponse != null && apiResponse.getData() != null && !apiResponse.getData().isEmpty()) {
-                return mapearAEstudiante(apiResponse.getData().get(0));
-            } else {
-                throw new IllegalArgumentException("No se encontraron datos para el CIF proporcionado");
-            }
+            // Retornar directamente la respuesta del API externo
+            return response.getBody();
 
-        } catch (HttpClientErrorException e) {
-            System.err.println("Error HTTP (4xx): " + e.getStatusCode());
-            System.err.println("Cuerpo de la respuesta: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Error al obtener información del estudiante: " + e.getMessage(), e);
-        } catch (HttpServerErrorException e) {
-            System.err.println("Error HTTP (5xx): " + e.getStatusCode());
-            System.err.println("Cuerpo de la respuesta: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Error en el servidor externo: " + e.getMessage(), e);
         } catch (Exception e) {
-            System.err.println("Error inesperado: " + e.getMessage());
-            throw new RuntimeException("Error desconocido: " + e.getMessage(), e);
+            throw new RuntimeException("Error al obtener información del estudiante: " + e.getMessage(), e);
         }
     }
+
+
 
     private Estudiante mapearAEstudiante(Map<String, Object> estudianteData) {
         Estudiante estudiante = new Estudiante();
@@ -111,7 +97,6 @@ public class EstudianteServiceImpl implements EstudianteService {
         estudiante.setFacultad((String) estudianteData.get("facultad"));
         return estudiante;
     }
-
 }
 
 

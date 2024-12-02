@@ -19,22 +19,13 @@ public class EstudianteController {
         this.estudianteService = estudianteService;
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<String> autenticarEstudiante(@RequestBody LoginRequest loginRequest) {
-        String token = estudianteService.autenticarEstudiante(loginRequest.getCif(), loginRequest.getPassword());
-        return ResponseEntity.ok(token);
+    public ResponseEntity<String> obtenerInformacionEstudiante(@RequestBody LoginRequest loginRequest) {
+        String token = estudianteService.autenticarEstudiante(loginRequest);
+        String estudianteData = estudianteService.obtenerInformacionEstudiante(token, loginRequest);
+        return ResponseEntity.ok(estudianteData);
     }
 
-    @GetMapping("/{cif}")
-    public ResponseEntity<Estudiante> obtenerInformacionEstudiante(
-            @PathVariable String cif, @RequestHeader("Authorization") String token) {
-
-        // Logs de entrada
-        System.out.println("CIF recibido: " + cif);
-        System.out.println("Token recibido en header: " + token);
-
-        Estudiante estudiante = estudianteService.obtenerInformacionEstudiante(cif, token);
-        return ResponseEntity.ok(estudiante);
-    }
 }
 
