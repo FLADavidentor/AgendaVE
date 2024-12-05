@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 public class ActividadDTO {
 
-    private UUID id; // Heredado de Identifiable
+    private UUID id;
     private String descripcion;
     private Date fecha;
     private Time horaInicio;
@@ -21,10 +21,9 @@ public class ActividadDTO {
     private boolean estado;
     private int cupo;
 
-    private UUID idNombreActividad; // Relación con NombreActividad
-    private UUID idLugar;           // Relación con Lugar
-    private UUID idTipoActividad;   // Relación con TipoActividad
-    private UUID idUsuario;         // Relación con Usuario
+    private String nombreActividad; // Enviar este nombre al endpoint
+    private String lugar;           // Enviar este nombre al endpoint
+    private String tipoActividad;   // Enviar este nombre al endpoint
 
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas; // Convalidaciones por tipo
     private Integer totalConvalidacionesPermitidas;

@@ -43,30 +43,37 @@ public class ActividadServiceImpl implements ActividadService {
     @Override
     public ActividadDTO guardarActividad(ActividadDTO actividadDTO) {
         // Validar y buscar entidades relacionadas
-        NombreActividad nombreActividad = nombreActividadRepository.findById(actividadDTO.getIdNombreActividad())
-                .orElseThrow(() -> new IllegalArgumentException("NombreActividad no encontrado con ID: " + actividadDTO.getIdNombreActividad()));
+        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("NombreActividad no encontrado: " + actividadDTO.getNombreActividad()));
 
-        Lugar lugar = lugarRepository.findById(actividadDTO.getIdLugar())
-                .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado con ID: " + actividadDTO.getIdLugar()));
+        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
 
-        TipoActividad tipoActividad = tipoActividadRepository.findById(actividadDTO.getIdTipoActividad())
-                .orElseThrow(() -> new IllegalArgumentException("TipoActividad no encontrado con ID: " + actividadDTO.getIdTipoActividad()));
-
-        Usuario usuario = usuarioRepository.findById(actividadDTO.getIdUsuario())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + actividadDTO.getIdUsuario()));
+        TipoActividad tipoActividad = tipoActividadRepository.findByNombreTipoContainingIgnoreCase(actividadDTO.getTipoActividad())
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("TipoActividad no encontrado: " + actividadDTO.getTipoActividad()));
 
         // Crear entidad Actividad
-        Actividad actividad = convertirAEntidad(actividadDTO, nombreActividad, lugar, tipoActividad, usuario);
+        Actividad actividad = new Actividad();
+        actividad.setDescripcion(actividadDTO.getDescripcion());
+        actividad.setFecha(actividadDTO.getFecha());
+        actividad.setHoraInicio(actividadDTO.getHoraInicio());
+        actividad.setHoraFin(actividadDTO.getHoraFin());
+        actividad.setCupo(actividadDTO.getCupo());
+        actividad.setNombreActividad(nombreActividad);
+        actividad.setLugar(lugar);
+        actividad.setTipoActividad(tipoActividad);
 
-        // Calcular cupo si no está definido
-        if (actividad.getCupo() == 0) {
-            actividad.setCupo(lugar.getCapacidad());
-        }
-
+        // Guardar en la base de datos
         Actividad actividadGuardada = actividadRepository.save(actividad);
 
+        // Convertir la entidad guardada a DTO y devolver
         return convertirAModelDTO(actividadGuardada);
     }
+
+
 
     @Override
     public Actividad buscarPorId(UUID id) {
@@ -76,11 +83,41 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
-        if (!actividadRepository.existsById(actividadDTO.getId())) {
-            throw new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId());
-        }
-        return guardarActividad(actividadDTO); // Reutiliza la lógica de guardar para la actualización
+        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
+
+        // Actualizar los campos simples
+        actividadExistente.setDescripcion(actividadDTO.getDescripcion());
+        actividadExistente.setFecha(actividadDTO.getFecha());
+        actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
+        actividadExistente.setHoraFin(actividadDTO.getHoraFin());
+        actividadExistente.setCupo(actividadDTO.getCupo());
+
+        // Buscar y asignar las relaciones basadas en nombres
+        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("NombreActividad no encontrado: " + actividadDTO.getNombreActividad()));
+        actividadExistente.setNombreActividad(nombreActividad);
+
+        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+        actividadExistente.setLugar(lugar);
+
+        TipoActividad tipoActividad = tipoActividadRepository.findByNombreTipoContainingIgnoreCase(actividadDTO.getTipoActividad())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("TipoActividad no encontrado: " + actividadDTO.getTipoActividad()));
+        actividadExistente.setTipoActividad(tipoActividad);
+
+        // Guardar los cambios
+        Actividad actividadActualizada = actividadRepository.save(actividadExistente);
+
+        return convertirAModelDTO(actividadActualizada);
     }
+
 
     @Override
     public void eliminarActividad(UUID id) {
@@ -165,12 +202,17 @@ public class ActividadServiceImpl implements ActividadService {
         actividadDTO.setHoraFin(actividad.getHoraFin());
         actividadDTO.setEstado(actividad.isEstado());
         actividadDTO.setCupo(actividad.getCupo());
-        actividadDTO.setIdNombreActividad(actividad.getNombreActividad() != null ? actividad.getNombreActividad().getId() : null);
-        actividadDTO.setIdLugar(actividad.getLugar() != null ? actividad.getLugar().getId() : null);
-        actividadDTO.setIdTipoActividad(actividad.getTipoActividad() != null ? actividad.getTipoActividad().getId() : null);
-        actividadDTO.setIdUsuario(actividad.getUsuario() != null ? actividad.getUsuario().getId() : null);
+
+        // Convertir relaciones a nombres
+        actividadDTO.setNombreActividad(actividad.getNombreActividad() != null ? actividad.getNombreActividad().getNombre() : null);
+        actividadDTO.setLugar(actividad.getLugar() != null ? actividad.getLugar().getNombre() : null);
+        actividadDTO.setTipoActividad(actividad.getTipoActividad() != null ? actividad.getTipoActividad().getNombreTipo() : null);
+
+        // Convalidaciones
         actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
         actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
+
         return actividadDTO;
     }
+
 }

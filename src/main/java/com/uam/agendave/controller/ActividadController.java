@@ -1,9 +1,15 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.LugarDTO;
+import com.uam.agendave.dto.TipoActividadDTO;
 import com.uam.agendave.model.Actividad;
+import com.uam.agendave.model.NombreActividad;
 import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;
+import com.uam.agendave.service.LugarService;
+import com.uam.agendave.service.NombreActividadService;
+import com.uam.agendave.service.TipoActividadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +21,22 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/actividad")
 public class ActividadController {
-
     private final ActividadService actividadService;
+    private final NombreActividadService nombreActividadService;
+    private final LugarService lugarService;
+    private final TipoActividadService tipoActividadService;
 
-    public ActividadController(ActividadService actividadService) {
+    // Constructor
+    public ActividadController(ActividadService actividadService,
+                               NombreActividadService nombreActividadService,
+                               LugarService lugarService,
+                               TipoActividadService tipoActividadService) {
         this.actividadService = actividadService;
+        this.nombreActividadService = nombreActividadService;
+        this.lugarService = lugarService;
+        this.tipoActividadService = tipoActividadService;
     }
+
 
     // Obtener todas las actividades
     @GetMapping("/all")
@@ -38,11 +54,40 @@ public class ActividadController {
         return ResponseEntity.ok(convertirAModelDTO(actividad));
     }
 
-    // Crear nueva actividad
     @PostMapping("/create")
     public ResponseEntity<ActividadDTO> crearActividad(@RequestBody ActividadDTO actividadDTO) {
-        ActividadDTO actividadCreada = actividadService.guardarActividad(actividadDTO);
-        return ResponseEntity.status(201).body(actividadCreada);
+        try {
+            // Buscar y asignar el ID de NombreActividad
+            List<NombreActividad> nombreActividades = nombreActividadService.buscarPorNombre(actividadDTO.getNombreActividad());
+            if (!nombreActividades.isEmpty()) {
+                actividadDTO.setNombreActividad(nombreActividades.get(0).getNombre()); // Usa el primero que encuentra
+            } else {
+                throw new IllegalArgumentException("NombreActividad no encontrado: " + actividadDTO.getNombreActividad());
+            }
+
+            // Buscar y asignar el ID de Lugar
+            List<LugarDTO> lugares = lugarService.buscarPorNombre(actividadDTO.getLugar());
+            if (!lugares.isEmpty()) {
+                actividadDTO.setLugar(lugares.get(0).getNombre());
+            } else {
+                throw new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar());
+            }
+
+            // Buscar y asignar el ID de TipoActividad
+            List<TipoActividadDTO> tiposActividad = tipoActividadService.buscarPorNombre(actividadDTO.getTipoActividad());
+            if (!tiposActividad.isEmpty()) {
+                actividadDTO.setTipoActividad(tiposActividad.get(0).getNombreTipo());
+            } else {
+                throw new IllegalArgumentException("TipoActividad no encontrado: " + actividadDTO.getTipoActividad());
+            }
+
+            // Guardar la actividad usando el servicio
+            ActividadDTO actividadCreada = actividadService.guardarActividad(actividadDTO);
+            return ResponseEntity.status(201).body(actividadCreada);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     // Actualizar actividad existente
@@ -97,16 +142,13 @@ public class ActividadController {
 
         // Relaciones
         if (actividad.getNombreActividad() != null) {
-            actividadDTO.setIdNombreActividad(actividad.getNombreActividad().getId());
+            actividadDTO.setNombreActividad(actividad.getNombreActividad().getNombre());
         }
         if (actividad.getLugar() != null) {
-            actividadDTO.setIdLugar(actividad.getLugar().getId());
+            actividadDTO.setLugar(actividad.getLugar().getNombre());
         }
         if (actividad.getTipoActividad() != null) {
-            actividadDTO.setIdTipoActividad(actividad.getTipoActividad().getId());
-        }
-        if (actividad.getUsuario() != null) {
-            actividadDTO.setIdUsuario(actividad.getUsuario().getId());
+            actividadDTO.setTipoActividad(actividad.getTipoActividad().getNombreTipo());
         }
 
         actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
