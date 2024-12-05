@@ -23,7 +23,6 @@ public class ActividadDTO {
 
     private String nombreActividad; // Enviar este nombre al endpoint
     private String lugar;           // Enviar este nombre al endpoint
-    private String tipoActividad;   // Enviar este nombre al endpoint
 
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas; // Convalidaciones por tipo
     private Integer totalConvalidacionesPermitidas;

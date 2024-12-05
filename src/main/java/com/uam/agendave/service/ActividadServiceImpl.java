@@ -15,20 +15,19 @@ public class ActividadServiceImpl implements ActividadService {
 
     private final ActividadRepository actividadRepository;
     private final NombreActividadRepository nombreActividadRepository;
+    private final NombreActividadService nombreActividadService;
     private final LugarRepository lugarRepository;
-    private final TipoActividadRepository tipoActividadRepository;
     private final UsuarioRepository usuarioRepository;
 
     public ActividadServiceImpl(
             ActividadRepository actividadRepository,
             NombreActividadRepository nombreActividadRepository,
             LugarRepository lugarRepository,
-            TipoActividadRepository tipoActividadRepository,
             UsuarioRepository usuarioRepository) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
+        this.nombreActividadService=new NombreActividadServiceImpl(nombreActividadRepository);
         this.lugarRepository = lugarRepository;
-        this.tipoActividadRepository = tipoActividadRepository;
         this.usuarioRepository = usuarioRepository;
     }
 
@@ -41,37 +40,46 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public ActividadDTO guardarActividad(ActividadDTO actividadDTO) {
-        // Validar y buscar entidades relacionadas
-        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("NombreActividad no encontrado: " + actividadDTO.getNombreActividad()));
+    public void guardarActividad(ActividadDTO actividadDTO) throws Exception{
 
-        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+        try{
+            // Buscar o crear NombreActividad
+            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                    .stream()
+                    .findFirst()
+                    .orElseGet(() -> {
+                        NombreActividad nuevaNombreActividad = new NombreActividad();
+                        nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
+                        return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
+                    });
+            System.out.println(nombreActividad.getId());
+            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
+                    .stream().findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+            System.out.println(lugar.getId());
 
-        TipoActividad tipoActividad = tipoActividadRepository.findByNombreTipoContainingIgnoreCase(actividadDTO.getTipoActividad())
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("TipoActividad no encontrado: " + actividadDTO.getTipoActividad()));
+            Actividad actividad = new Actividad();
+            actividad.setNombre(nombreActividad.getNombre());
+            actividad.setDescripcion(actividadDTO.getDescripcion());
+            actividad.setFecha(actividadDTO.getFecha());
+            actividad.setHoraInicio(actividadDTO.getHoraInicio());
+            actividad.setHoraFin(actividadDTO.getHoraFin());
+            actividad.setCupo(actividadDTO.getCupo());
+            actividad.setNombreActividad(nombreActividad);
+            actividad.setLugar(lugar);
 
-        // Crear entidad Actividad
-        Actividad actividad = new Actividad();
-        actividad.setDescripcion(actividadDTO.getDescripcion());
-        actividad.setFecha(actividadDTO.getFecha());
-        actividad.setHoraInicio(actividadDTO.getHoraInicio());
-        actividad.setHoraFin(actividadDTO.getHoraFin());
-        actividad.setCupo(actividadDTO.getCupo());
-        actividad.setNombreActividad(nombreActividad);
-        actividad.setLugar(lugar);
-        actividad.setTipoActividad(tipoActividad);
+            actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
+            actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
 
-        // Guardar en la base de datos
-        Actividad actividadGuardada = actividadRepository.save(actividad);
+            actividadRepository.save(actividad);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-        // Convertir la entidad guardada a DTO y devolver
-        return convertirAModelDTO(actividadGuardada);
+
     }
+
+
 
 
 
@@ -105,12 +113,6 @@ public class ActividadServiceImpl implements ActividadService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
         actividadExistente.setLugar(lugar);
-
-        TipoActividad tipoActividad = tipoActividadRepository.findByNombreTipoContainingIgnoreCase(actividadDTO.getTipoActividad())
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("TipoActividad no encontrado: " + actividadDTO.getTipoActividad()));
-        actividadExistente.setTipoActividad(tipoActividad);
 
         // Guardar los cambios
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
@@ -174,7 +176,7 @@ public class ActividadServiceImpl implements ActividadService {
 
     // Métodos de conversión
 
-    private Actividad convertirAEntidad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar, TipoActividad tipoActividad, Usuario usuario) {
+    private Actividad convertirAEntidad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar, Usuario usuario) {
         Actividad actividad = new Actividad();
         actividad.setId(actividadDTO.getId());
         actividad.setDescripcion(actividadDTO.getDescripcion());
@@ -186,7 +188,6 @@ public class ActividadServiceImpl implements ActividadService {
         actividad.setNombre(nombreActividad.getNombre());
         actividad.setNombreActividad(nombreActividad);
         actividad.setLugar(lugar);
-        actividad.setTipoActividad(tipoActividad);
         actividad.setUsuario(usuario);
         actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
         actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
@@ -206,7 +207,6 @@ public class ActividadServiceImpl implements ActividadService {
         // Convertir relaciones a nombres
         actividadDTO.setNombreActividad(actividad.getNombreActividad() != null ? actividad.getNombreActividad().getNombre() : null);
         actividadDTO.setLugar(actividad.getLugar() != null ? actividad.getLugar().getNombre() : null);
-        actividadDTO.setTipoActividad(actividad.getTipoActividad() != null ? actividad.getTipoActividad().getNombreTipo() : null);
 
         // Convalidaciones
         actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());

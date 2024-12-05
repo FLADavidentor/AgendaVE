@@ -12,7 +12,7 @@ public interface ActividadService {
 
     List<ActividadDTO> obtenerTodas();
 
-    ActividadDTO guardarActividad(ActividadDTO actividadDTO);
+    void guardarActividad(ActividadDTO actividadDTO) throws Exception;
 
     Actividad buscarPorId(UUID id);
 

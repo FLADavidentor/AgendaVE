@@ -1,17 +1,13 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.NombreActividadDTO;
-import com.uam.agendave.dto.TipoActividadDTO;
 import com.uam.agendave.model.NombreActividad;
-import com.uam.agendave.model.TipoActividad;
 import com.uam.agendave.service.NombreActividadService;
-import com.uam.agendave.service.TipoActividadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,7 +16,7 @@ public class NombreActividadController {
 
     private final NombreActividadService nombreActividadService;
 
-    public NombreActividadController(NombreActividadService nombreActividadService, TipoActividadService tipoActividadService) {
+    public NombreActividadController(NombreActividadService nombreActividadService) {
         this.nombreActividadService = nombreActividadService;
     }
 

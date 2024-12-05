@@ -56,9 +56,6 @@ public class Actividad extends Identifiable {
     @JoinColumn(name = "idLugar")
     private Lugar lugar;
 
-    @ManyToOne
-    @JoinColumn(name = "idTipoActividad")
-    private TipoActividad tipoActividad;
 
     @ManyToOne
     @JoinColumn(name = "idUsuario")

@@ -21,6 +21,7 @@ public class EstudianteController {
 
 
     @PostMapping("/login")
+    @CrossOrigin(origins = "*")
     public ResponseEntity<String> obtenerInformacionEstudiante(@RequestBody LoginRequest loginRequest) {
         String token = estudianteService.autenticarEstudiante(loginRequest);
         String estudianteData = estudianteService.obtenerInformacionEstudiante(token, loginRequest);
