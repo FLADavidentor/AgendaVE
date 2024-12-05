@@ -43,7 +43,7 @@ public class NombreActividadController {
     }
 
     // Crear una nueva NombreActividad
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<NombreActividadDTO> crearNombreActividad(@RequestBody NombreActividadDTO nombreActividadDTO) {
         NombreActividad nombreActividad = convertirAEntidad(nombreActividadDTO);
         NombreActividad nuevaActividad = nombreActividadService.guardar(nombreActividad); // Este método debe llamarse

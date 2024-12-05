@@ -31,7 +31,7 @@ public class RegistroController {
         return new ResponseEntity<>(registro, HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> guardar(@RequestBody RegistroDTO registroDTO) {
         try {
             System.out.println("JSON Recibido: " + registroDTO);
