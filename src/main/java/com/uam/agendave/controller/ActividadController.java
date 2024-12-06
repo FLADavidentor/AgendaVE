@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/actividad")
 public class ActividadController {
@@ -32,6 +33,7 @@ public class ActividadController {
 
 
     // Obtener todas las actividades
+    @CrossOrigin(origins = "*")
     @GetMapping("/all")
     public List<ActividadDTO> obtenerTodas() {
         return actividadService.obtenerTodas();
@@ -47,6 +49,7 @@ public class ActividadController {
         return ResponseEntity.ok(convertirAModelDTO(actividad));
     }
 
+    @CrossOrigin(origins = "*")
     @PostMapping("/create")
     public void crearActividad(@RequestBody ActividadDTO actividadDTO) {
         try {

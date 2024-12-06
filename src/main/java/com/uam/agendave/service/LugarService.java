@@ -12,4 +12,5 @@ public interface LugarService {
     void eliminarLugar(UUID id);
     List<LugarDTO> buscarPorNombre(String nombre);
     List<LugarDTO> buscarPorCapacidadMayorA(int capacidad);
+    List<LugarDTO> buscarPorNombreParcial(String nombre);
 }

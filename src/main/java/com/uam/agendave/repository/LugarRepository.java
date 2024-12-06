@@ -11,4 +11,6 @@ public interface LugarRepository extends JpaRepository<Lugar, UUID> {
     List<Lugar> findByNombreContainingIgnoreCase(String nombre); // Búsqueda por nombre (parcial y sin distinción de mayúsculas)
     List<Lugar> findByCapacidadGreaterThan(int capacidad);       // Búsqueda por capacidad mayor a un valor
 
+    // Busca actividades que empiecen con el texto dado
+    List<Lugar> findByNombreStartingWith(String nombre);
 }

@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
+@Table(name = "registro", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"idActividad", "cif"})
+})
 @Getter
 @Setter
 public class Registro extends Identifiable {

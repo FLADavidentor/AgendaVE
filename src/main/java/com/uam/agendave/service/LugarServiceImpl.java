@@ -56,9 +56,17 @@ public class LugarServiceImpl implements LugarService {
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public List<LugarDTO> buscarPorCapacidadMayorA(int capacidad) {
         return lugarRepository.findByCapacidadGreaterThan(capacidad).stream()
+                .map(this::convertirA_dto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LugarDTO> buscarPorNombreParcial(String nombre) {
+        return lugarRepository.findByNombreStartingWith(nombre).stream()
                 .map(this::convertirA_dto)
                 .collect(Collectors.toList());
     }
@@ -69,7 +77,6 @@ public class LugarServiceImpl implements LugarService {
         lugarDTO.setId(lugar.getId());
         lugarDTO.setNombre(lugar.getNombre());
         lugarDTO.setCapacidad(lugar.getCapacidad());
-        lugarDTO.setUbicacion(lugar.getUbicacion());
         return lugarDTO;
     }
 
@@ -78,7 +85,6 @@ public class LugarServiceImpl implements LugarService {
         lugar.setId(lugarDTO.getId());
         lugar.setNombre(lugarDTO.getNombre());
         lugar.setCapacidad(lugarDTO.getCapacidad());
-        lugar.setUbicacion(lugarDTO.getUbicacion());
         return lugar;
     }
 }

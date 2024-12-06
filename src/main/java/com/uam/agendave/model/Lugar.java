@@ -13,7 +13,6 @@ public class Lugar extends Identifiable {
 
     private String nombre;
     private int capacidad;
-    private String ubicacion;
 
     @OneToMany(mappedBy = "lugar")
     private List<Actividad> actividades;

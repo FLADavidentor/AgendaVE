@@ -12,5 +12,4 @@ public class LugarDTO {
     private UUID id;
     private String nombre;
     private int capacidad;
-    private String ubicacion;
 }

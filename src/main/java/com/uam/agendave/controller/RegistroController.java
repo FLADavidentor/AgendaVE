@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/registro")
+@CrossOrigin(origins = "*")
 public class RegistroController {
 
     private final RegistroService registroService;
@@ -30,7 +31,7 @@ public class RegistroController {
         RegistroDTO registro = registroService.buscarPorId(id);
         return new ResponseEntity<>(registro, HttpStatus.OK);
     }
-
+    @CrossOrigin(origins = "*")
     @PostMapping("/create")
     public ResponseEntity<?> guardar(@RequestBody RegistroDTO registroDTO) {
         try {

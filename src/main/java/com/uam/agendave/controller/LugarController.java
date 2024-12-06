@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/lugares")
 public class LugarController {
 
@@ -23,6 +24,13 @@ public class LugarController {
         List<LugarDTO> lugares = lugarService.obtenerTodos();
         return ResponseEntity.ok(lugares);
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<LugarDTO>> buscarPorNombreParcial(@RequestParam String nombre) {
+        List<LugarDTO> lugares = lugarService.buscarPorNombreParcial(nombre);
+        return ResponseEntity.ok(lugares);
+    }
+
 
     @PostMapping("/create")
     public ResponseEntity<LugarDTO> guardarLugar(@RequestBody LugarDTO lugarDTO) {
@@ -41,4 +49,6 @@ public class LugarController {
         lugarService.eliminarLugar(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }

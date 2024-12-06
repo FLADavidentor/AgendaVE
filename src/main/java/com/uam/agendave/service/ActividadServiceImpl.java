@@ -33,10 +33,34 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public List<ActividadDTO> obtenerTodas() {
+        // Obtener todas las actividades desde el repositorio
         List<Actividad> actividades = actividadRepository.findAll();
-        return actividades.stream()
-                .map(this::convertirAModelDTO)
-                .collect(Collectors.toList());
+
+        // Convertir las entidades a DTOs
+        return actividades.stream().map(actividad -> {
+            ActividadDTO actividadDTO = new ActividadDTO();
+            actividadDTO.setId(actividad.getId());
+            actividadDTO.setDescripcion(actividad.getDescripcion());
+            actividadDTO.setFecha(actividad.getFecha());
+            actividadDTO.setHoraInicio(actividad.getHoraInicio());
+            actividadDTO.setHoraFin(actividad.getHoraFin());
+            actividadDTO.setEstado(actividad.isEstado());
+            actividadDTO.setCupo(actividad.getCupo());
+
+            // Manejar las relaciones: convertir IDs a nombres
+            actividadDTO.setNombreActividad(actividad.getNombreActividad() != null
+                    ? actividad.getNombreActividad().getNombre()
+                    : "Nombre no especificado");
+            actividadDTO.setLugar(actividad.getLugar() != null
+                    ? actividad.getLugar().getNombre()
+                    : "Lugar no especificado");
+
+            // Manejar convalidaciones
+            actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
+            actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
+
+            return actividadDTO;
+        }).collect(Collectors.toList());
     }
 
     @Override
