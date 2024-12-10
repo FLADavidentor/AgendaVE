@@ -5,6 +5,11 @@ import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,17 +23,20 @@ public class ActividadServiceImpl implements ActividadService {
     private final NombreActividadService nombreActividadService;
     private final LugarRepository lugarRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ImageRepository imagenRepository;
+
 
     public ActividadServiceImpl(
             ActividadRepository actividadRepository,
             NombreActividadRepository nombreActividadRepository,
             LugarRepository lugarRepository,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository, ImageRepository imageRepository) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService=new NombreActividadServiceImpl(nombreActividadRepository);
         this.lugarRepository = lugarRepository;
         this.usuarioRepository = usuarioRepository;
+        this.imagenRepository = imageRepository;
     }
 
     @Override
@@ -59,14 +67,22 @@ public class ActividadServiceImpl implements ActividadService {
             actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
             actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
 
+            // Información de la imagen asociada
+            if (actividad.getImage() != null) {
+                ImageData image = actividad.getImage();
+                actividadDTO.setImageName(image.getName());
+                actividadDTO.setImageType(image.getType());
+                actividadDTO.setImageBase64(Base64.getEncoder().encodeToString(image.getImageData()));
+            }
+
             return actividadDTO;
         }).collect(Collectors.toList());
     }
 
-    @Override
-    public void guardarActividad(ActividadDTO actividadDTO) throws Exception{
 
-        try{
+    @Override
+    public void guardarActividad(ActividadDTO actividadDTO) throws Exception {
+        try {
             // Buscar o crear NombreActividad
             NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
                     .stream()
@@ -77,11 +93,37 @@ public class ActividadServiceImpl implements ActividadService {
                         return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
                     });
             System.out.println(nombreActividad.getId());
+
+            // Buscar Lugar
             Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
-                    .stream().findFirst()
+                    .stream()
+                    .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
             System.out.println(lugar.getId());
 
+            // Procesar la imagen en formato Base64
+            String base64Data = actividadDTO.getImageBase64();
+            if (base64Data == null || base64Data.isEmpty()) {
+                throw new IllegalArgumentException("El campo 'imageBase64' no puede ser nulo o vacío.");
+            }
+
+            // Decodificar Base64
+            if (base64Data.startsWith("data:image")) {
+                base64Data = base64Data.substring(base64Data.indexOf(",") + 1);
+            }
+            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+
+            // Crear o buscar la imagen
+            ImageData imageData = imagenRepository.findByName(actividadDTO.getImageName())
+                    .orElseGet(() -> {
+                        ImageData nuevaImageData = new ImageData();
+                        nuevaImageData.setName(actividadDTO.getImageName());
+                        nuevaImageData.setType(actividadDTO.getImageType());
+                        nuevaImageData.setImageData(imageBytes);
+                        return imagenRepository.save(nuevaImageData); // Guardar la imagen
+                    });
+
+            // Crear la actividad
             Actividad actividad = new Actividad();
             actividad.setNombre(nombreActividad.getNombre());
             actividad.setDescripcion(actividadDTO.getDescripcion());
@@ -91,16 +133,16 @@ public class ActividadServiceImpl implements ActividadService {
             actividad.setCupo(actividadDTO.getCupo());
             actividad.setNombreActividad(nombreActividad);
             actividad.setLugar(lugar);
+            actividad.setImage(imageData); // Relacionar con la imagen
 
             actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
             actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
 
+            // Guardar la actividad
             actividadRepository.save(actividad);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error al guardar la actividad: " + e.getMessage(), e);
         }
-
-
     }
 
 
@@ -235,6 +277,13 @@ public class ActividadServiceImpl implements ActividadService {
         // Convalidaciones
         actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
         actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
+        // Información de la imagen
+        if (actividad.getImage() != null) {
+            ImageData image = actividad.getImage();
+            actividadDTO.setImageName(image.getName());
+            actividadDTO.setImageType(image.getType());
+            actividadDTO.setImageBase64(Base64.getEncoder().encodeToString(image.getImageData()));
+        }
 
         return actividadDTO;
     }
