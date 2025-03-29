@@ -60,8 +60,4 @@ public class Actividad extends Identifiable {
     @ManyToOne
     @JoinColumn(name = "idUsuario")
     private Usuario usuario;
-
-    @OneToOne
-    @JoinColumn(name = "image_id")
-    private ImageData image;
 }

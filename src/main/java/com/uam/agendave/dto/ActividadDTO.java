@@ -26,18 +26,4 @@ public class ActividadDTO {
 
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas; // Convalidaciones por tipo
     private Integer totalConvalidacionesPermitidas;
-
-    private String ubicacion;
-
-    private String imageName;
-    private String imageType;
-    private String imageBase64; // Imagen codificada en Base64
-
-    public String getImageDataUri() {
-        if (imageBase64 != null && imageType != null) {
-            return "data:" + imageType + ";base64," + imageBase64;
-        }
-        return null;
-    }
-
 }
