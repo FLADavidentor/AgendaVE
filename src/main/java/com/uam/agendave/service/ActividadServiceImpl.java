@@ -1,6 +1,7 @@
 package com.uam.agendave.service;
 
 import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.ImagenDTO;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class ActividadServiceImpl implements ActividadService {
             UsuarioRepository usuarioRepository) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
-        this.nombreActividadService=new NombreActividadServiceImpl(nombreActividadRepository);
+        this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
         this.lugarRepository = lugarRepository;
         this.usuarioRepository = usuarioRepository;
     }
@@ -38,7 +39,22 @@ public class ActividadServiceImpl implements ActividadService {
 
         // Convertir las entidades a DTOs
         return actividades.stream().map(actividad -> {
+
             ActividadDTO actividadDTO = new ActividadDTO();
+
+            ImageData imgData = actividad.getImagen();
+            if (imgData != null
+                    && imgData.getImagenBase64() != null
+                    && !imgData.getImagenBase64().trim().isEmpty()) {
+                ImagenDTO imagenDTO = new ImagenDTO();
+                imagenDTO.setNombre(actividad.getNombre());
+                imagenDTO.setImagenBase64(imgData.getImagenBase64());
+                actividadDTO.setImagen(imagenDTO);
+            } else {
+                // Opcional: asegurarte de que la entidad actividad permita imagen null
+                actividadDTO.setImagen(null);
+            }
+
             actividadDTO.setId(actividad.getId());
             actividadDTO.setDescripcion(actividad.getDescripcion());
             actividadDTO.setFecha(actividad.getFecha());
@@ -46,6 +62,7 @@ public class ActividadServiceImpl implements ActividadService {
             actividadDTO.setHoraFin(actividad.getHoraFin());
             actividadDTO.setEstado(actividad.isEstado());
             actividadDTO.setCupo(actividad.getCupo());
+
 
             // Manejar las relaciones: convertir IDs a nombres
             actividadDTO.setNombreActividad(actividad.getNombreActividad() != null
@@ -64,9 +81,9 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public void guardarActividad(ActividadDTO actividadDTO) throws Exception{
+    public void guardarActividad(ActividadDTO actividadDTO) throws Exception {
 
-        try{
+        try {
             // Buscar o crear NombreActividad
             NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
                     .stream()
@@ -77,23 +94,13 @@ public class ActividadServiceImpl implements ActividadService {
                         return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
                     });
             System.out.println(nombreActividad.getId());
+
             Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
                     .stream().findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
             System.out.println(lugar.getId());
 
-            Actividad actividad = new Actividad();
-            actividad.setNombre(nombreActividad.getNombre());
-            actividad.setDescripcion(actividadDTO.getDescripcion());
-            actividad.setFecha(actividadDTO.getFecha());
-            actividad.setHoraInicio(actividadDTO.getHoraInicio());
-            actividad.setHoraFin(actividadDTO.getHoraFin());
-            actividad.setCupo(actividadDTO.getCupo());
-            actividad.setNombreActividad(nombreActividad);
-            actividad.setLugar(lugar);
-
-            actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
-            actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
+            Actividad actividad = getActividad(actividadDTO, nombreActividad, lugar);
 
             actividadRepository.save(actividad);
         } catch (Exception e) {
@@ -103,8 +110,40 @@ public class ActividadServiceImpl implements ActividadService {
 
     }
 
+    private static Actividad getActividad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar) {
+        Actividad actividad = new Actividad();
 
+        ImagenDTO imgDto = actividadDTO.getImagen();
+        if (imgDto != null
+                && imgDto.getImagenBase64() != null
+                && !imgDto.getImagenBase64().trim().isEmpty()) {
 
+            ImageData imageData = new ImageData();
+            imageData.setNombre(imgDto.getNombre());
+            imageData.setImagenBase64(imgDto.getImagenBase64());
+            System.out.println(imageData.getImagenBase64());
+            actividad.setImagen(imageData);
+            System.out.println(actividad.getImagen().getImagenBase64());
+
+        } else {
+            // Opcional: asegurarte de que la entidad actividad permita imagen null
+            actividad.setImagen(null);
+        }
+
+        actividad.setNombre(nombreActividad.getNombre());
+        actividad.setDescripcion(actividadDTO.getDescripcion());
+        actividad.setFecha(actividadDTO.getFecha());
+        actividad.setHoraInicio(actividadDTO.getHoraInicio());
+        actividad.setHoraFin(actividadDTO.getHoraFin());
+        actividad.setCupo(actividadDTO.getCupo());
+        actividad.setNombreActividad(nombreActividad);
+        actividad.setLugar(lugar);
+
+        actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
+        actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
+
+        return actividad;
+    }
 
 
     @Override
@@ -176,6 +215,7 @@ public class ActividadServiceImpl implements ActividadService {
                 .map(this::convertirAModelDTO)
                 .collect(Collectors.toList());
     }
+
     @Override
     public Map<TipoConvalidacion, Integer> obtenerConvalidacionesPorActividad(UUID id) {
         List<Object[]> resultados = actividadRepository.findConvalidacionesById(id);
@@ -196,27 +236,6 @@ public class ActividadServiceImpl implements ActividadService {
         return actividad.getTotalConvalidacionesPermitidas();
     }
 
-
-
-    // Métodos de conversión
-
-    private Actividad convertirAEntidad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar, Usuario usuario) {
-        Actividad actividad = new Actividad();
-        actividad.setId(actividadDTO.getId());
-        actividad.setDescripcion(actividadDTO.getDescripcion());
-        actividad.setFecha(actividadDTO.getFecha());
-        actividad.setHoraInicio(actividadDTO.getHoraInicio());
-        actividad.setHoraFin(actividadDTO.getHoraFin());
-        actividad.setEstado(actividadDTO.isEstado());
-        actividad.setCupo(actividadDTO.getCupo());
-        actividad.setNombre(nombreActividad.getNombre());
-        actividad.setNombreActividad(nombreActividad);
-        actividad.setLugar(lugar);
-        actividad.setUsuario(usuario);
-        actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
-        actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
-        return actividad;
-    }
 
     private ActividadDTO convertirAModelDTO(Actividad actividad) {
         ActividadDTO actividadDTO = new ActividadDTO();

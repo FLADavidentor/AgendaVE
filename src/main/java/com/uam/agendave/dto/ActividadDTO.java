@@ -26,4 +26,6 @@ public class ActividadDTO {
 
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas; // Convalidaciones por tipo
     private Integer totalConvalidacionesPermitidas;
+
+    private ImagenDTO imagen;
 }

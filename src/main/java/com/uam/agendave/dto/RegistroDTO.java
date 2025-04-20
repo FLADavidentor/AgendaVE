@@ -20,6 +20,7 @@ public class RegistroDTO {
     @JsonDeserialize(keyUsing = TipoConvalidacionKeyDeserializer.class)
     private Map<TipoConvalidacion, Integer> convalidacionesRealizadas;
     private int totalConvalidado; // Créditos totales convalidados
+    private ImagenDTO imagen;
 }
 
 

@@ -16,11 +16,11 @@ import lombok.*;
 @AllArgsConstructor
 public class ImageData extends Identifiable {
 
-    private Long id;
+
 
     private String nombre;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "imagen_base64", columnDefinition = "TEXT")
     private String imagenBase64;
 }
