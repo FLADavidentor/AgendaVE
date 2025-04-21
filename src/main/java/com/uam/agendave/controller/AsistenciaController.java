@@ -30,12 +30,12 @@ public class AsistenciaController {
         return asistenciaService.obtenerTodas();
     }
 
-    // Obtener asistencia por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Asistencia> obtenerPorId(@PathVariable UUID id) {
-        Asistencia asistencia = asistenciaService.buscarPorId(id);
-        return ResponseEntity.ok(asistencia);
-    }
+
+    @PostMapping("/inscribir_actividad")
+    public ResponseEntity inscribirActividad(@RequestBody )
+
+
+
 
     // Obtener asistencia por actividad
     @GetMapping("/actividad/{actividadId}")
