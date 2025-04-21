@@ -18,18 +18,18 @@ public class ActividadServiceImpl implements ActividadService {
     private final NombreActividadRepository nombreActividadRepository;
     private final NombreActividadService nombreActividadService;
     private final LugarRepository lugarRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final RegistroRepository registroRepository;
 
     public ActividadServiceImpl(
             ActividadRepository actividadRepository,
             NombreActividadRepository nombreActividadRepository,
             LugarRepository lugarRepository,
-            UsuarioRepository usuarioRepository) {
+            RegistroRepository registroRepository) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
         this.lugarRepository = lugarRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.registroRepository = registroRepository;
     }
 
     @Override
@@ -206,6 +206,14 @@ public class ActividadServiceImpl implements ActividadService {
         return actividades.stream()
                 .map(this::convertirAModelDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getCupoRestante(UUID actividadID) {
+        Actividad act = actividadRepository.findById(actividadID)
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + actividadID));
+        long inscritos = registroRepository.countByActividadId(actividadID);
+        return act.getCupo() - (int) inscritos;
     }
 
     @Override

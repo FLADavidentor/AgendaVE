@@ -24,6 +24,7 @@ public interface ActividadService {
 
     List<ActividadDTO> buscarPorLugar(UUID idLugar);
 
+    int getCupoRestante(UUID actividadID);
 
     List<ActividadDTO> buscarActividadesConCupoDisponible(); // Ajustado para no requerir el parámetro cupo
     Map<TipoConvalidacion, Integer> obtenerConvalidacionesPorActividad(UUID id);

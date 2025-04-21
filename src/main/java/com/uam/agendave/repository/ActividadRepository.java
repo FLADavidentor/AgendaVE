@@ -26,4 +26,6 @@ FROM Actividad a JOIN a.convalidacionesPermitidas c
 WHERE a.id = :id
 """)
     List<Object[]> findConvalidacionesById(UUID id);
+
+
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,26 +16,33 @@ import java.util.Map;
 @Setter
 public class Registro extends Identifiable {
 
-    private boolean convalidacion; // Indica si el registro incluye convalidación
-    private boolean transporte;    // Indica si el estudiante usará transporte
-
     @Column(nullable = false)
-    private String cif; // Almacena el CIF del estudiante
+    private String cif;
 
     @ManyToOne
     @JoinColumn(name = "idActividad", nullable = false)
     private Actividad actividad;   // Relación con la actividad
 
-    @ElementCollection
-    @CollectionTable(name = "registro_convalidaciones", joinColumns = @JoinColumn(name = "idRegistro"))
-    @MapKeyColumn(name = "tipoConvalidacion") // Enum como clave
-    @Column(name = "cantidad")
-    @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
-    private Map<TipoConvalidacion, Integer> convalidacionesRealizadas; // Créditos convalidados por tipo
+
+    private boolean transporte;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_asistencia", nullable = false)
+    private EstadoAsistencia estadoAsistencia;
 
     @Column(name = "totalConvalidado")
-    private int totalConvalidado; // Créditos totales convalidados por el estudiante en esta actividad
+    private int totalConvalidado;
 
-    }
+    @Column(name = "asistencia_timestamp", nullable = false)
+    private LocalDateTime asistenciaTimestamp;
+
+//    @ElementCollection
+//    @CollectionTable(name = "registro_convalidaciones", joinColumns = @JoinColumn(name = "idRegistro"))
+//    @MapKeyColumn(name = "tipoConvalidacion") // Enum como clave
+//    @Column(name = "cantidad")
+//    @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
+//    private Map<TipoConvalidacion, Integer> convalidacionesRealizadas; // Créditos convalidados por tipo
+
+}
 
 

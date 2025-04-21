@@ -10,54 +10,54 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/registro")
-@CrossOrigin(origins = "*")
-public class RegistroController {
-
-    private final RegistroService registroService;
-
-    public RegistroController(RegistroService registroService) {
-        this.registroService = registroService;
-    }
-
-    @GetMapping("/all")
-    public List<RegistroDTO> obtenerTodos() {
-        return registroService.obtenerTodos();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<RegistroDTO> obtenerPorId(@PathVariable UUID id) {
-        RegistroDTO registro = registroService.buscarPorId(id);
-        return new ResponseEntity<>(registro, HttpStatus.OK);
-    }
-    @CrossOrigin(origins = "*")
-    @PostMapping("/create")
-    public ResponseEntity<?> guardar(@RequestBody RegistroDTO registroDTO) {
-        try {
-            System.out.println("JSON Recibido: " + registroDTO);
-            RegistroDTO nuevoRegistro = registroService.guardarRegistro(registroDTO);
-            return new ResponseEntity<>(nuevoRegistro, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
-        registroService.eliminarRegistro(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping("/estudiante/{idEstudiante}")
-    public List<RegistroDTO> obtenerPorEstudiante(@PathVariable String idEstudiante) {
-        return registroService.buscarPorEstudiante(idEstudiante);
-    }
-
-    @GetMapping("/actividad/{idActividad}")
-    public List<RegistroDTO> obtenerPorActividad(@PathVariable UUID idActividad) {
-        return registroService.buscarPorActividad(idActividad);
-    }
-}
+//@RestController
+//@RequestMapping("/registro")
+//@CrossOrigin(origins = "*")
+//public class RegistroController {
+//
+//    private final RegistroService registroService;
+//
+//    public RegistroController(RegistroService registroService) {
+//        this.registroService = registroService;
+//    }
+//
+//    @GetMapping("/all")
+//    public List<RegistroDTO> obtenerTodos() {
+//        return registroService.obtenerTodos();
+//    }
+//
+//    @GetMapping("/{id}")
+//    public ResponseEntity<RegistroDTO> obtenerPorId(@PathVariable UUID id) {
+//        RegistroDTO registro = registroService.buscarPorId(id);
+//        return new ResponseEntity<>(registro, HttpStatus.OK);
+//    }
+//    @CrossOrigin(origins = "*")
+//    @PostMapping("/create")
+//    public ResponseEntity<?> guardar(@RequestBody RegistroDTO registroDTO) {
+//        try {
+//            System.out.println("JSON Recibido: " + registroDTO);
+//            RegistroDTO nuevoRegistro = registroService.guardarRegistro(registroDTO);
+//            return new ResponseEntity<>(nuevoRegistro, HttpStatus.CREATED);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
+//    }
+//
+//
+//    @DeleteMapping("/delete/{id}")
+//    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
+//        registroService.eliminarRegistro(id);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
+//
+//    @GetMapping("/estudiante/{idEstudiante}")
+//    public List<RegistroDTO> obtenerPorEstudiante(@PathVariable String idEstudiante) {
+//        return registroService.buscarPorEstudiante(idEstudiante);
+//    }
+//
+//    @GetMapping("/actividad/{idActividad}")
+//    public List<RegistroDTO> obtenerPorActividad(@PathVariable UUID idActividad) {
+//        return registroService.buscarPorActividad(idActividad);
+//    }
+//}
 

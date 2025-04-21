@@ -12,15 +12,12 @@ import java.util.UUID;
 @Getter
 @Setter
 public class RegistroDTO {
-    private UUID id;
-    private boolean convalidacion;
-    private boolean transporte;
-    private String idEstudiante;
+
+    private String cif;
     private UUID idActividad;
-    @JsonDeserialize(keyUsing = TipoConvalidacionKeyDeserializer.class)
-    private Map<TipoConvalidacion, Integer> convalidacionesRealizadas;
-    private int totalConvalidado; // Créditos totales convalidados
-    private ImagenDTO imagen;
+    private Boolean transporte;
+    private TipoConvalidacion tipoConvalidacion;
+
 }
 
 

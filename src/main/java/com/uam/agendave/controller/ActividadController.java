@@ -39,15 +39,6 @@ public class ActividadController {
         return actividadService.obtenerTodas();
     }
 
-    // Obtener actividad por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ActividadDTO> obtenerPorId(@PathVariable UUID id) {
-        Actividad actividad = actividadService.buscarPorId(id);
-        if (actividad == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(convertirAModelDTO(actividad));
-    }
 
     @CrossOrigin(origins = "*")
     @PostMapping("/create")
@@ -58,7 +49,11 @@ public class ActividadController {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
 
+    @GetMapping("/{id}/cupo_restante")
+    public int cupoRestante(@PathVariable UUID id) {
+        return actividadService.getCupoRestante(id);
     }
 
 

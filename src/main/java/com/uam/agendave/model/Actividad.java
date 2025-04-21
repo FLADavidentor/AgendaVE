@@ -33,7 +33,6 @@ public class Actividad extends Identifiable {
     private boolean estado;
     private int cupo;
 
-    // Usar un mapa para convalidaciones permitidas (enum como clave)
     @ElementCollection
     @CollectionTable(name = "actividad_convalidaciones", joinColumns = @JoinColumn(name = "idActividad"))
     @MapKeyColumn(name = "tipoConvalidacion") // Enum como clave
@@ -41,21 +40,15 @@ public class Actividad extends Identifiable {
     @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas;
 
-//    @ElementCollection
-//    private List<Integer> detalleConvalidacion;
 
     private Integer totalConvalidacionesPermitidas;
 
-    @OneToMany(mappedBy = "actividad")
+    @OneToMany(mappedBy = "actividad", fetch = FetchType.LAZY)
     private List<Registro> registros;
-
-    @OneToOne(mappedBy = "actividad")
-    private Asistencia asistencia;
 
     @ManyToOne
     @JoinColumn(name = "idLugar")
     private Lugar lugar;
-
 
     @ManyToOne
     @JoinColumn(name = "idUsuario")
@@ -64,4 +57,7 @@ public class Actividad extends Identifiable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = true)
     @JoinColumn(name = "imagen_id", nullable = true)
     private ImageData imagen;
+
+
+
 }
