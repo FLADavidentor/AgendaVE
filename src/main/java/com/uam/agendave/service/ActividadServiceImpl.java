@@ -154,23 +154,35 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
+        // Buscar la actividad a actualizar por ID
         Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
-        // Actualizar los campos simples
+        // Comprobar si el nombre de la actividad ha cambiado
+        if (!actividadDTO.getNombreActividad().equals(actividadExistente.getNombreActividad())) {
+            // Buscar el NombreActividad por nombre
+            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                    .stream()
+                    .findFirst()
+                    .orElseGet(() -> {
+                        // Si no existe, crear uno nuevo
+                        NombreActividad nuevoNombreActividad = new NombreActividad();
+                        nuevoNombreActividad.setNombre(actividadDTO.getNombreActividad());
+                        return nombreActividadRepository.save(nuevoNombreActividad);
+                    });
+
+            // Actualizar el NombreActividad en la actividad
+            actividadExistente.setNombreActividad(nombreActividad);
+        }
+
+        // Actualizar los campos simples de la actividad
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
         actividadExistente.setFecha(actividadDTO.getFecha());
         actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
         actividadExistente.setHoraFin(actividadDTO.getHoraFin());
         actividadExistente.setCupo(actividadDTO.getCupo());
 
-        // Buscar y asignar las relaciones basadas en nombres
-        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("NombreActividad no encontrado: " + actividadDTO.getNombreActividad()));
-        actividadExistente.setNombreActividad(nombreActividad);
-
+        // Buscar y asignar Lugar
         Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
                 .stream()
                 .findFirst()
@@ -180,8 +192,10 @@ public class ActividadServiceImpl implements ActividadService {
         // Guardar los cambios
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
+        // Convertir a DTO y retornar
         return convertirAModelDTO(actividadActualizada);
     }
+
 
 
     @Override

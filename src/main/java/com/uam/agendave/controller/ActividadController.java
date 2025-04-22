@@ -51,6 +51,7 @@ public class ActividadController {
         }
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/{id}/cupo_restante")
     public int cupoRestante(@PathVariable UUID id) {
         return actividadService.getCupoRestante(id);
@@ -58,6 +59,7 @@ public class ActividadController {
 
 
     // Actualizar actividad existente
+    @CrossOrigin(origins = "*")
     @PutMapping("/update/{id}")
     public ResponseEntity<ActividadDTO> actualizarActividad(@PathVariable UUID id, @RequestBody ActividadDTO actividadDTO) {
         actividadDTO.setId(id);
