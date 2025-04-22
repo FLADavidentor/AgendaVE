@@ -52,7 +52,7 @@ public class Actividad extends Identifiable {
 
     @ManyToOne
     @JoinColumn(name = "idUsuario")
-    private Usuario usuario;
+    private Administrador usuario;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = true)
     @JoinColumn(name = "imagen_id", nullable = true)

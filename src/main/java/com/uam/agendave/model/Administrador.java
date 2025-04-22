@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Usuario extends Identifiable {
+public class Administrador extends Identifiable {
 
     @Column(nullable = false, unique = true)
     private String username;
