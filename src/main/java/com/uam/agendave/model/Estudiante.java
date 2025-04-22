@@ -8,8 +8,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Estudiante {
+@Entity
+public class Estudiante extends Identifiable {
     private String cif;
+    private String password;
     private String nombres;
     private String apellidos;
     private String tipo;

@@ -1,16 +1,16 @@
 package com.uam.agendave.service;
 
 
+import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.LoginRequest;
+import com.uam.agendave.dto.TestDTO;
 import com.uam.agendave.dto.UsuarioDTO;
+import com.uam.agendave.model.ApiResponse;
 import com.uam.agendave.model.Estudiante;
-import com.uam.agendave.model.Usuario;
-import com.uam.agendave.repository.UsuarioRepository;
+import com.uam.agendave.repository.EstudianteRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -18,6 +18,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,9 +28,43 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private static final String BASE_URL = "https://uvirtual.uam.edu.ni:442/uambiblioapi/User/";
     private final RestClient restClient;
+    private final EstudianteRepository estudianteRepository;
 
-    public UsuarioServiceImpl(RestClient restClient) {
+    public UsuarioServiceImpl(RestClient restClient, EstudianteRepository estudianteRepository) {
         this.restClient = restClient;
+        this.estudianteRepository = estudianteRepository;
+    }
+
+    @Override
+    public EstudianteDTO loginUsuario(LoginRequest loginRequest) {
+        try {
+            Optional<Estudiante> estudiante = estudianteRepository.findByCif(loginRequest.getCif());
+
+            if (estudiante.isPresent()
+                    && estudiante.get().getPassword().equals(loginRequest.getPassword())) {
+
+
+                EstudianteDTO estudianteDTO = mapearEstudianteDTO(estudiante.get());
+                return estudianteDTO;
+
+
+            } else {
+                String token = autenticarEstudiante(loginRequest);
+                TestDTO estudianteData = obtenerInformacionEstudiante(token, loginRequest);
+
+                Estudiante estudiantePersistencia = mapearAEstudiante(estudianteData, loginRequest.getPassword());
+
+                estudianteRepository.save(estudiantePersistencia);
+                EstudianteDTO estudianteDTO = mapearEstudianteDTO(estudiantePersistencia);
+
+                return estudianteDTO;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
@@ -71,19 +106,24 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public String obtenerInformacionEstudiante(String token, LoginRequest loginRequest) {
+    public TestDTO obtenerInformacionEstudiante(String token, LoginRequest loginRequest) {
         String infoUrl = BASE_URL + "GetStudentInformation?cif=" + loginRequest.getCif();
 
         try {
             // Solicitud GET para obtener información del estudiante
-            ResponseEntity<String> response = restClient.get()
+            ResponseEntity<ApiResponse> response = restClient.get()
                     .uri(infoUrl)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
-                    .toEntity(String.class);
+                    .toEntity(ApiResponse.class);
 
-            // Retornar directamente la respuesta del API externo
-            return response.getBody();
+            ApiResponse body = response.getBody();
+            if (body != null && body.isSuccess() && !body.getData().isEmpty()) {
+                TestDTO estudiante = body.getData().get(0);
+                return estudiante;
+            }
+
+            return null;
 
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener información del estudiante: " + e.getMessage(), e);
@@ -91,21 +131,47 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
 
-
-    private Estudiante mapearAEstudiante(Map<String, Object> estudianteData) {
+    private Estudiante mapearAEstudiante(TestDTO estudianteData, String password) {
         Estudiante estudiante = new Estudiante();
-        estudiante.setCif((String) estudianteData.get("cif"));
-        estudiante.setNombres((String) estudianteData.get("nombres"));
-        estudiante.setApellidos((String) estudianteData.get("apellidos"));
-        estudiante.setTipo((String) estudianteData.get("tipo"));
-        estudiante.setCorreo((String) estudianteData.get("correo"));
-        estudiante.setSexo((String) estudianteData.get("sexo"));
-        estudiante.setTelefono((String) estudianteData.get("telefono"));
-        estudiante.setCarrera((String) estudianteData.get("carrera"));
-        estudiante.setFacultad((String) estudianteData.get("facultad"));
+
+        String tel = estudianteData.getTelefono() != null ? estudianteData.getTelefono().toString() : "";
+        String tipo = estudianteData.getTipo() != null ? estudianteData.getTipo().toString() : "";
+        String correo = estudianteData.getCorreo() != null ? estudianteData.getCorreo().toString() : "";
+        String sexo = estudianteData.getSexo() != null ? estudianteData.getSexo().toString() : "";
+        String carrera = estudianteData.getCarrera() != null ? estudianteData.getCarrera().toString() : "";
+        String facultad = estudianteData.getFacultad() != null ? estudianteData.getFacultad().toString() : "";
+
+
+        estudiante.setCif((String) estudianteData.getCif());
+        estudiante.setNombres((String) estudianteData.getNombres());
+        estudiante.setApellidos((String) estudianteData.getApellidos());
+
+        estudiante.setTipo(tipo);
+        estudiante.setCorreo(correo);
+        estudiante.setSexo(sexo);
+        estudiante.setTelefono(tel);
+        estudiante.setCarrera(carrera);
+        estudiante.setFacultad(facultad);
+        estudiante.setPassword(password);
+
         return estudiante;
     }
 
+    private EstudianteDTO mapearEstudianteDTO(Estudiante estudiante)
+    {
+        EstudianteDTO estudianteDTO = new EstudianteDTO();
 
+        estudianteDTO.setApellido(estudiante.getApellidos());
+        estudianteDTO.setNombre(estudiante.getNombres());
+        estudianteDTO.setCif(estudiante.getCif());
+        estudianteDTO.setCorreo(estudiante.getCorreo());
+        estudianteDTO.setFacultad(estudiante.getFacultad());
+        estudianteDTO.setCarrera(estudiante.getCarrera());
+
+        return estudianteDTO;
+
+
+
+    }
 
 }
