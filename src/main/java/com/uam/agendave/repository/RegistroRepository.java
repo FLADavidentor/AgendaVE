@@ -17,4 +17,6 @@ public interface RegistroRepository extends JpaRepository<Registro, UUID> {
     List<Registro> findByActividadId(@Param("idActividad") UUID idActividad);
 
     long countByActividadId(UUID idActividad);
+
+    List<Registro> finByActividadId(UUID idActividad);
 }

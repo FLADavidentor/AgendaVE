@@ -1,6 +1,8 @@
 package com.uam.agendave.controller;
 
+import com.uam.agendave.dto.LoginRequest;
 import com.uam.agendave.dto.LoginRequestUser;
+import com.uam.agendave.model.Usuario;
 import com.uam.agendave.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,15 +11,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/usuario")
 public class LoginController {
 
-    private final UsuarioService usuarioService;
+    private final UsuarioService estudianteService;
 
-    public LoginController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
+    public LoginController(UsuarioService estudianteService) {
+        this.estudianteService = estudianteService;
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<String> autenticarUsuario(@RequestBody LoginRequestUser loginRequestUser) {
-        String token = usuarioService.autenticarUsuario(loginRequestUser.getUsername(), loginRequestUser.getPassword());
-        return ResponseEntity.ok(token);
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<String> obtenerInformacionEstudiante(@RequestBody LoginRequest loginRequest) {
+        String token = estudianteService.autenticarEstudiante(loginRequest);
+        String estudianteData = estudianteService.obtenerInformacionEstudiante(token, loginRequest);
+        return ResponseEntity.ok(estudianteData);
     }
 }

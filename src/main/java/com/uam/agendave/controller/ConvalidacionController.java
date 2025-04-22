@@ -1,12 +1,5 @@
 package com.uam.agendave.controller;
 
-import com.uam.agendave.dto.ConvalidacionDTO;
-import com.uam.agendave.service.ConvalidacionService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 //
 //@RestController
 //@RequestMapping("/convalidaciones")

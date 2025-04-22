@@ -1,17 +1,18 @@
 package com.uam.agendave.service;
 
 import com.uam.agendave.dto.RegistroDTO;
-import com.uam.agendave.model.Actividad;
-import com.uam.agendave.model.EstadoAsistencia;
-import com.uam.agendave.model.Registro;
-import com.uam.agendave.model.TipoConvalidacion;
+import com.uam.agendave.model.*;
 import com.uam.agendave.repository.RegistroRepository;
 import jakarta.persistence.Version;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Service
 public class RegistroServiceImpl implements RegistroService {
 
@@ -49,4 +50,13 @@ public class RegistroServiceImpl implements RegistroService {
 
 
     }
+
+    //Saber a que actividades esta inscritas un estudiante
+    public List<Actividad> buscarActividadesInscritasPorCif(String cif) {
+        List <Registro> registrosDelEstudiante = repository.findByCif(cif);
+        return registrosDelEstudiante.stream().map(r -> r.getActividad()).collect(Collectors.toList());
+    }
+
+    //Conocer los estudiantes que esten inscritos a una actividad
+    //TODO : Es necsario tener un registro de los estudiante por su CIF.
 }

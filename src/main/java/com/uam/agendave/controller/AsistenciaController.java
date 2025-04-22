@@ -22,11 +22,6 @@ public class AsistenciaController {
         this.actividadService = actividadService;  // Asignamos el servicio de Actividad
     }
 
-//    // Obtener todas las asistencias
-//    @GetMapping("/all")
-//    public List<Asistencia> obtenerTodas() {
-//        return asistenciaService.obtenerTodas();
-//    }
 
     // Tiene que llegar un DTO que contenga el CIF del estudiante y el ID de la actividad
     // Como parametros me tienen que mandar un: Cif: String - Id de Actividad: String - Transporte:Boolean
