@@ -58,5 +58,5 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     //Conocer los estudiantes que esten inscritos a una actividad
-    //TODO : Es necsario tener un registro de los estudiante por su CIF.
+
 }
