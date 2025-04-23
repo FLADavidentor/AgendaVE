@@ -9,6 +9,6 @@ import java.util.UUID;
 @Setter
 public class AsistenciaDTO {
 
-    private UUID id;
+    private String cif;
     private UUID idActividad;
 }

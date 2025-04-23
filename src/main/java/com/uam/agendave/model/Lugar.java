@@ -1,4 +1,5 @@
 package com.uam.agendave.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
@@ -15,5 +16,6 @@ public class Lugar extends Identifiable {
     private int capacidad;
 
     @OneToMany(mappedBy = "lugar")
+    @JsonBackReference
     private List<Actividad> actividades;
 }

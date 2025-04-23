@@ -23,7 +23,6 @@ public class Registro extends Identifiable {
     @JoinColumn(name = "idActividad", nullable = false)
     private Actividad actividad;   // Relación con la actividad
 
-
     private boolean transporte;
 
     @Enumerated(EnumType.STRING)
@@ -36,12 +35,9 @@ public class Registro extends Identifiable {
     @Column(name = "asistencia_timestamp", nullable = false)
     private LocalDateTime asistenciaTimestamp;
 
-//    @ElementCollection
-//    @CollectionTable(name = "registro_convalidaciones", joinColumns = @JoinColumn(name = "idRegistro"))
-//    @MapKeyColumn(name = "tipoConvalidacion") // Enum como clave
-//    @Column(name = "cantidad")
-//    @Enumerated(EnumType.STRING) // Guardar el enum como String en la base de datos
-//    private Map<TipoConvalidacion, Integer> convalidacionesRealizadas; // Créditos convalidados por tipo
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_convalidacion", nullable = false)
+    private TipoConvalidacion tipoConvalidacion;
 
 }
 

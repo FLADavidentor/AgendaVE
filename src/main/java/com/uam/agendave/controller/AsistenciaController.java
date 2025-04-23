@@ -1,27 +1,32 @@
 package com.uam.agendave.controller;
 
+import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.Actividad;
 import com.uam.agendave.model.Registro;
+import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.RegistroService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/asistencia")
-@CrossOrigin(origins = "http://localhost:5173")   // permite llamadas desde tu front
+@CrossOrigin(origins = "*")
 public class AsistenciaController {
 
     private final RegistroService registroService;
     private final ActividadService actividadService;
 
-    // Inyección de los servicios en el constructor
+
     public AsistenciaController(RegistroService registroService, ActividadService actividadService) {
         this.registroService = registroService;
         this.actividadService = actividadService;  // Asignamos el servicio de Actividad
     }
-
 
     // Tiene que llegar un DTO que contenga el CIF del estudiante y el ID de la actividad
     // Como parametros me tienen que mandar un: Cif: String - Id de Actividad: String - Transporte:Boolean
@@ -30,42 +35,37 @@ public class AsistenciaController {
 
         try {
             registroService.guardarRegistro(registroDTO, actividadService);
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return ResponseEntity.status(201).body(null);
     }
 
+    @PostMapping("/{cif}/actividades_inscritas")
+    public ResponseEntity<List<?>> actividadesInscritas(@PathVariable String cif) {
+        try {
+            return ResponseEntity.ok().body(registroService.buscarActividadesInscritasPorCif(cif));
 
-//    // Obtener asistencia por actividad
-//    @GetMapping("/actividad/{actividadId}")
-//    public ResponseEntity<List<Asistencia>> obtenerPorActividad(@PathVariable UUID actividadId) {
-//        List<Asistencia> asistencias = asistenciaService.buscarPorActividadId(actividadId);
-//        return ResponseEntity.ok(asistencias);
-//    }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-    // Crear nueva asistencia
-//    @PostMapping("/create")
-//    public ResponseEntity<Asistencia> crearAsistencia(@RequestBody AsistenciaDTO asistenciaDTO) {
-//        // Convertir DTO a entidad
-//        Asistencia nuevaAsistencia = new Asistencia();
-//
-//        // Buscar la actividad por ID (este es el cambio)
-//        Actividad actividad = actividadService.buscarPorId(asistenciaDTO.getIdActividad());  // Aquí usamos el servicio de Actividad
-//
-//        // Asignamos la actividad a la nueva asistencia
-//        nuevaAsistencia.setActividad(actividad);  // Establecer el objeto Actividad completo en vez de solo el ID
-//
-//        // Guardar asistencia
-//        Asistencia asistenciaGuardada = asistenciaService.guardarAsistencia(nuevaAsistencia);
-//        return ResponseEntity.status(201).body(asistenciaGuardada);
-//    }
+    @PostMapping("/marcar_asistencia")
+    public ResponseEntity marcarAsistencia(@RequestBody AsistenciaDTO asistenciaDTO) {
 
-//    // Eliminar asistencia por ID
-//    @DeleteMapping("/delete/{id}")
-//    public ResponseEntity<Void> eliminarAsistencia(@PathVariable UUID id) {
-//        asistenciaService.eliminarAsistencia(id);
-//        return ResponseEntity.noContent().build();
-//    }
+        try{
+            registroService.marcarAsistencia(asistenciaDTO);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(400).body(null);
+        }
+
+        return ResponseEntity.ok().body(null);
+    }
+
+
+
 }
 
