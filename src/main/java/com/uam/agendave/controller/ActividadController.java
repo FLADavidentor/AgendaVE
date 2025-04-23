@@ -6,6 +6,7 @@ import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;
 import com.uam.agendave.service.LugarService;
 import com.uam.agendave.service.NombreActividadService;
+import com.uam.agendave.service.RegistroService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class ActividadController {
     private final NombreActividadService nombreActividadService;
     private final LugarService lugarService;
 
+
     // Constructor
     public ActividadController(ActividadService actividadService,
                                NombreActividadService nombreActividadService,
@@ -32,8 +34,7 @@ public class ActividadController {
     }
 
 
-    // Obtener todas las actividades
-    @CrossOrigin(origins = "*")
+
     @GetMapping("/all")
     public List<ActividadDTO> obtenerTodas() {
         return actividadService.obtenerTodas();
@@ -58,6 +59,7 @@ public class ActividadController {
     }
 
 
+
     // Actualizar actividad existente
     @CrossOrigin(origins = "*")
     @PutMapping("/update/{id}")
@@ -76,6 +78,7 @@ public class ActividadController {
         actividadService.eliminarActividad(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/{id}/convalidaciones")
     public ResponseEntity<Map<TipoConvalidacion, Integer>> obtenerConvalidaciones(@PathVariable UUID id) {
         try {

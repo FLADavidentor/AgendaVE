@@ -7,16 +7,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface RegistroRepository extends JpaRepository<Registro, UUID> {
 
     List<Registro> findByCif(String cif);
 
-//    @Query("SELECT r FROM Registro r WHERE r.actividad.id = :idActividad")
-//    List<Registro> findByActividadId(@Param("idActividad") UUID idActividad);
+    List<Registro> findByActividadId(UUID idActividad);
 
     long countByActividadId(UUID idActividad);
 
-//    List<Registro> finByActividadId(UUID idActividad);
+    Optional<Registro> findByCifAndActividadId(String cif, UUID idActividad);
 }

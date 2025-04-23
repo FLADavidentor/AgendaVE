@@ -1,13 +1,16 @@
 package com.uam.agendave.service;
 
+import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.RegistroRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Version;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -45,16 +48,53 @@ public class RegistroServiceImpl implements RegistroService {
         registro.setTotalConvalidado(variable.values().iterator().next());
         registro.setEstadoAsistencia(EstadoAsistencia.AUSENTE);
         registro.setAsistenciaTimestamp(LocalDateTime.now());
-        repository.save(registro);
+        registro.setTipoConvalidacion(registroDTO.getTipoConvalidacion());
 
+        repository.save(registro);
 
 
     }
 
-    //Saber a que actividades esta inscritas un estudiante
+    @Transactional()
+    public Map<TipoConvalidacion, Integer> obtenerTotalCreditosPorTipo(String cif) {
+        return repository.findByCif(cif).stream()
+                // filtramos sólo los registros con asistencia presente
+                .filter(r -> r.getEstadoAsistencia() == EstadoAsistencia.PRESENTE)
+                // agrupamos y sumamos
+                .collect(Collectors.groupingBy(
+                        Registro::getTipoConvalidacion,
+                        () -> new EnumMap<>(TipoConvalidacion.class),
+                        Collectors.summingInt(Registro::getTotalConvalidado)
+                ));
+    }
+
+    @Override
+    @Transactional  // importa jakarta.transaction.Transactional o la de Spring
+    public void marcarAsistencia(AsistenciaDTO asistenciaDTO) {
+        Registro registro = repository
+                .findByCifAndActividadId(asistenciaDTO.getCif(), asistenciaDTO.getIdActividad())
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "No existe registro para CIF=" + asistenciaDTO.getCif() +
+                                        " y actividad=" + asistenciaDTO.getIdActividad()
+                        )
+                );
+
+        registro.setEstadoAsistencia(EstadoAsistencia.PRESENTE);
+        // opcional: actualizar también timestamp
+        registro.setAsistenciaTimestamp(LocalDateTime.now());
+
+        // No necesitas llamar explicitamente a save() si la entidad está manejada
+        // repository.save(registro);
+    }
+
+    @Transactional
     public List<Actividad> buscarActividadesInscritasPorCif(String cif) {
-        List <Registro> registrosDelEstudiante = repository.findByCif(cif);
-        return registrosDelEstudiante.stream().map(r -> r.getActividad()).collect(Collectors.toList());
+
+        List<Actividad> registrosDelEstudiante = repository.findByCif(cif).stream().map(Registro::getActividad).collect(Collectors.toList());
+        System.out.println(registrosDelEstudiante);
+        return registrosDelEstudiante;
+
     }
 
     //Conocer los estudiantes que esten inscritos a una actividad

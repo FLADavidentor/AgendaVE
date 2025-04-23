@@ -15,8 +15,9 @@ public class RegistroDTO {
 
     private String cif;
     private UUID idActividad;
-    private Boolean transporte;
     private TipoConvalidacion tipoConvalidacion;
+    private Boolean transporte;
+
 
 }
 

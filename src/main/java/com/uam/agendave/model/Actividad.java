@@ -43,8 +43,8 @@ public class Actividad extends Identifiable {
 
     private Integer totalConvalidacionesPermitidas;
 
-    @OneToMany(mappedBy = "actividad", fetch = FetchType.LAZY)
-    private List<Registro> registros;
+//    @OneToMany(mappedBy = "actividad", fetch = FetchType.LAZY)
+//    private List<Registro> registros;
 
     @ManyToOne
     @JoinColumn(name = "idLugar")
