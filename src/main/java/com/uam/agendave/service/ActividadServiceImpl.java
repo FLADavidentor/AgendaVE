@@ -76,6 +76,17 @@ public class ActividadServiceImpl implements ActividadService {
             actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
             actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
 
+            String base64Image = imgData.getImagenBase64(); // La cadena Base64 de la imagen
+            int maxLength = 100; // Longitud máxima que deseas mostrar
+
+// Truncar la cadena si excede el límite
+            if (base64Image.length() > maxLength) {
+                base64Image = base64Image.substring(0, maxLength) + "..."; // Añadir "..." al final si la cadena es truncada
+            }
+
+            System.out.println("Base64 de la imagen (truncado): " + base64Image);
+
+
             return actividadDTO;
         }).collect(Collectors.toList());
     }
@@ -154,35 +165,28 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
-        // Buscar la actividad a actualizar por ID
         Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
-        // Comprobar si el nombre de la actividad ha cambiado
-        if (!actividadDTO.getNombreActividad().equals(actividadExistente.getNombreActividad())) {
-            // Buscar el NombreActividad por nombre
-            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
-                    .stream()
-                    .findFirst()
-                    .orElseGet(() -> {
-                        // Si no existe, crear uno nuevo
-                        NombreActividad nuevoNombreActividad = new NombreActividad();
-                        nuevoNombreActividad.setNombre(actividadDTO.getNombreActividad());
-                        return nombreActividadRepository.save(nuevoNombreActividad);
-                    });
-
-            // Actualizar el NombreActividad en la actividad
-            actividadExistente.setNombreActividad(nombreActividad);
-        }
-
-        // Actualizar los campos simples de la actividad
+        // Actualizar los campos simples
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
         actividadExistente.setFecha(actividadDTO.getFecha());
         actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
         actividadExistente.setHoraFin(actividadDTO.getHoraFin());
         actividadExistente.setCupo(actividadDTO.getCupo());
 
-        // Buscar y asignar Lugar
+        // Buscar o crear NombreActividad
+        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                .stream()
+                .findFirst()
+                .orElseGet(() -> {
+                    NombreActividad nuevaNombreActividad = new NombreActividad();
+                    nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
+                    return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
+                });
+
+        actividadExistente.setNombreActividad(nombreActividad);
+
         Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
                 .stream()
                 .findFirst()
@@ -192,9 +196,20 @@ public class ActividadServiceImpl implements ActividadService {
         // Guardar los cambios
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
-        // Convertir a DTO y retornar
+        // Eliminar NombreActividad si ya no está siendo usado
+        eliminarNombreActividadNoUsado(nombreActividad);
+
         return convertirAModelDTO(actividadActualizada);
     }
+
+    private void eliminarNombreActividadNoUsado(NombreActividad nombreActividad) {
+        // Verificar si el NombreActividad está siendo usado por otras actividades
+        List<Actividad> actividadesConNombre = actividadRepository.findByNombreActividadId(nombreActividad.getId());
+        if (actividadesConNombre.isEmpty()) {
+            nombreActividadRepository.delete(nombreActividad); // Eliminarlo si no se usa
+        }
+    }
+
 
 
 

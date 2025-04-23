@@ -27,5 +27,7 @@ WHERE a.id = :id
 """)
     List<Object[]> findConvalidacionesById(UUID id);
 
+    List<Actividad> findByNombreActividadId(UUID nombreActividadId);
+
 
 }
