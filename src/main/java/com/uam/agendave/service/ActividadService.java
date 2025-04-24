@@ -19,9 +19,9 @@ public interface ActividadService {
 
     Actividad buscarPorId(UUID id);
 
-//    ActividadDTO actualizarActividad(ActividadDTO actividadDTO);
+    ActividadDTO actualizarActividad(ActividadDTO actividadDTO);
 //
-//    void eliminarActividad(UUID id);
+    void eliminarActividad(UUID id);
 
     int getCupoRestante(UUID actividadID);
 

@@ -1,6 +1,7 @@
 package com.uam.agendave.repository;
 
 import com.uam.agendave.model.Registro;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,6 @@ public interface RegistroRepository extends JpaRepository<Registro, UUID> {
     long countByActividadId(UUID idActividad);
 
     Optional<Registro> findByCifAndActividadId(String cif, UUID idActividad);
+    @Transactional
+    void deleteByActividadId(UUID idActividad);
 }

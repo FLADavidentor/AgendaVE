@@ -6,6 +6,7 @@ import com.uam.agendave.dto.ImagenDTO;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.boot.autoconfigure.batch.BatchTransactionManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -181,54 +182,59 @@ public class ActividadServiceImpl implements ActividadService {
         return actividadRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
     }
 
-//    @Override
-//    public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
-//        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
-//
-//        // Actualizar los campos simples
-//        actividadExistente.setDescripcion(actividadDTO.getDescripcion());
-//        actividadExistente.setFecha(actividadDTO.getFecha());
-//        actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
-//        actividadExistente.setHoraFin(actividadDTO.getHoraFin());
-//        actividadExistente.setCupo(actividadDTO.getCupo());
-//
-//        // Buscar o crear NombreActividad
-//        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad()).stream().findFirst().orElseGet(() -> {
-//            NombreActividad nuevaNombreActividad = new NombreActividad();
-//            nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
-//            return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
-//        });
-//
-//        actividadExistente.setNombreActividad(nombreActividad);
-//
-//        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
-//        actividadExistente.setLugar(lugar);
-//
-//        // Guardar los cambios
-//        Actividad actividadActualizada = actividadRepository.save(actividadExistente);
-//
-//        // Eliminar NombreActividad si ya no está siendo usado
-//        eliminarNombreActividadNoUsado(nombreActividad);
-//
-//        return convertirAModelDTO(actividadActualizada);
-//    }
-//
-//    private void eliminarNombreActividadNoUsado(NombreActividad nombreActividad) {
-//        // Verificar si el NombreActividad está siendo usado por otras actividades
-//        List<Actividad> actividadesConNombre = actividadRepository.findByNombreActividadId(nombreActividad.getId());
-//        if (actividadesConNombre.isEmpty()) {
-//            nombreActividadRepository.delete(nombreActividad); // Eliminarlo si no se usa
-//        }
-//    }
+    @Override
+    public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
+        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
+
+        // Actualizar los campos simples
+        actividadExistente.setDescripcion(actividadDTO.getDescripcion());
+        actividadExistente.setFecha(actividadDTO.getFecha());
+        actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
+        actividadExistente.setHoraFin(actividadDTO.getHoraFin());
+        actividadExistente.setCupo(actividadDTO.getCupo());
+
+        // Buscar o crear NombreActividad
+        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad()).stream().findFirst().orElseGet(() -> {
+            NombreActividad nuevaNombreActividad = new NombreActividad();
+            nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
+            return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
+        });
+
+        actividadExistente.setNombreActividad(nombreActividad);
+
+        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+        actividadExistente.setLugar(lugar);
+
+        // Guardar los cambios
+        Actividad actividadActualizada = actividadRepository.save(actividadExistente);
+
+        // Eliminar NombreActividad si ya no está siendo usado
+        eliminarNombreActividadNoUsado(nombreActividad);
+
+        return convertirAModelDTO(actividadActualizada);
+    }
+
+    private void eliminarNombreActividadNoUsado(NombreActividad nombreActividad) {
+        // Verificar si el NombreActividad está siendo usado por otras actividades
+        List<Actividad> actividadesConNombre = actividadRepository.findByNombreActividadId(nombreActividad.getId());
+        if (actividadesConNombre.isEmpty()) {
+            nombreActividadRepository.delete(nombreActividad); // Eliminarlo si no se usa
+        }
+    }
 
 
-//    @Override
-//    public void eliminarActividad(UUID id) {
-//        if (!actividadRepository.existsById(id)) {
-//            throw new IllegalArgumentException("Actividad no encontrada con ID: " + id);
-//        }
-//        actividadRepository.deleteById(id);
-//    }
+        @Override
+        @Transactional
+        public void eliminarActividad(UUID id) {
+
+
+            if (!actividadRepository.existsById(id)) {
+                throw new IllegalArgumentException("Actividad no encontrada con ID: " + id);
+            }
+            registroRepository.deleteByActividadId(id);
+            actividadRepository.deleteById(id);
+
+        }
 
 
 

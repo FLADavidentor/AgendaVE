@@ -2,12 +2,7 @@ package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.dto.EstudianteDTO;
-import com.uam.agendave.model.Actividad;
-import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;
-import com.uam.agendave.service.LugarService;
-import com.uam.agendave.service.NombreActividadService;
-import com.uam.agendave.service.RegistroService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -87,24 +82,24 @@ public class ActividadController {
     }
 
 
-//    // Actualizar actividad existente
-//    @CrossOrigin(origins = "*")
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<ActividadDTO> actualizarActividad(@PathVariable UUID id, @RequestBody ActividadDTO actividadDTO) {
-//        actividadDTO.setId(id);
-//        ActividadDTO actividadActualizada = actividadService.actualizarActividad(actividadDTO);
-//        if (actividadActualizada == null) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        return ResponseEntity.ok(actividadActualizada);
-//    }
+    // Actualizar actividad existente
+    @CrossOrigin(origins = "*")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ActividadDTO> actualizarActividad(@PathVariable UUID id, @RequestBody ActividadDTO actividadDTO) {
+        actividadDTO.setId(id);
+        ActividadDTO actividadActualizada = actividadService.actualizarActividad(actividadDTO);
+        if (actividadActualizada == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(actividadActualizada);
+    }
 
-//    // Eliminar actividad
-//    @DeleteMapping("/delete/{id}")
-//    public ResponseEntity<Void> eliminarActividad(@PathVariable UUID id) {
-//        actividadService.eliminarActividad(id);
-//        return ResponseEntity.noContent().build();
-//    }
+    // Eliminar actividad
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> eliminarActividad(@PathVariable UUID id) {
+        actividadService.eliminarActividad(id);
+        return ResponseEntity.noContent().build();
+    }
 
 
 }
