@@ -191,6 +191,7 @@ public class ActividadServiceImpl implements ActividadService {
         actividadExistente.setFecha(actividadDTO.getFecha());
         actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
         actividadExistente.setHoraFin(actividadDTO.getHoraFin());
+        actividadExistente.setEstado(actividadDTO.isEstado());
         actividadExistente.setCupo(actividadDTO.getCupo());
 
         // Buscar o crear NombreActividad

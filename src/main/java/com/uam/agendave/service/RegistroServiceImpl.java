@@ -69,7 +69,7 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    @Transactional  // importa jakarta.transaction.Transactional o la de Spring
+    @Transactional
     public void marcarAsistencia(AsistenciaDTO asistenciaDTO) {
         Registro registro = repository
                 .findByCifAndActividadId(asistenciaDTO.getCif(), asistenciaDTO.getIdActividad())
@@ -80,13 +80,13 @@ public class RegistroServiceImpl implements RegistroService {
                         )
                 );
 
-        registro.setEstadoAsistencia(EstadoAsistencia.PRESENTE);
-        // opcional: actualizar también timestamp
-        registro.setAsistenciaTimestamp(LocalDateTime.now());
+        // ✅ Aplicar el valor real recibido
+        registro.setEstadoAsistencia(asistenciaDTO.getEstadoAsistencia());
 
-        // No necesitas llamar explicitamente a save() si la entidad está manejada
-        // repository.save(registro);
+        // Actualizar timestamp
+        registro.setAsistenciaTimestamp(LocalDateTime.now());
     }
+
 
     @Transactional
     public List<Actividad> buscarActividadesInscritasPorCif(String cif) {
