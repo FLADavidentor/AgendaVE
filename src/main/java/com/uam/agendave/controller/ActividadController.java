@@ -1,6 +1,7 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.model.Actividad;
 import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;
@@ -59,7 +60,6 @@ public class ActividadController {
     }
 
 
-
     // Actualizar actividad existente
     @CrossOrigin(origins = "*")
     @PutMapping("/update/{id}")
@@ -79,51 +79,34 @@ public class ActividadController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/convalidaciones")
-    public ResponseEntity<Map<TipoConvalidacion, Integer>> obtenerConvalidaciones(@PathVariable UUID id) {
+
+    @PostMapping("/listado_estudiante/{id_actividad}")
+    public List<EstudianteDTO> listadoActividad(@PathVariable UUID id_actividad) {
         try {
-            Map<TipoConvalidacion, Integer> convalidaciones = actividadService.obtenerConvalidacionesPorActividad(id);
-            return ResponseEntity.ok(convalidaciones);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return actividadService.obtenerListadoEstudiante(id_actividad);
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
         }
     }
 
+    @PostMapping("/obtener_actividades/{id_actividad}/{paginacion}")
+    public List<ActividadDTO> obtenerActividades(@PathVariable UUID id_actividad, @PathVariable int paginacion) {
 
-    @GetMapping("/{id}/convalidaciones/total")
-    public ResponseEntity<Integer> obtenerTotalConvalidaciones(@PathVariable UUID id) {
-        return ResponseEntity.ok(actividadService.obtenerTotalConvalidacionesMaximas(id));
-    }
-
-    // Buscar actividades con cupo disponible
-    @GetMapping("/con-cupo")
-    public List<ActividadDTO> obtenerActividadesConCupoDisponible() {
-        return actividadService.buscarActividadesConCupoDisponible();
-    }
-
-    // Conversión de Actividad a ActividadDTO
-    private ActividadDTO convertirAModelDTO(Actividad actividad) {
-        ActividadDTO actividadDTO = new ActividadDTO();
-        actividadDTO.setId(actividad.getId());
-        actividadDTO.setDescripcion(actividad.getDescripcion());
-        actividadDTO.setFecha(actividad.getFecha());
-        actividadDTO.setHoraInicio(actividad.getHoraInicio());
-        actividadDTO.setHoraFin(actividad.getHoraFin());
-        actividadDTO.setEstado(actividad.isEstado());
-        actividadDTO.setCupo(actividad.getCupo());
-
-        // Relaciones
-        if (actividad.getNombreActividad() != null) {
-            actividadDTO.setNombreActividad(actividad.getNombreActividad().getNombre());
-        }
-        if (actividad.getLugar() != null) {
-            actividadDTO.setLugar(actividad.getLugar().getNombre());
+        try {
+            return actividadService.obtenerActividadesXPaginacion(id_actividad, paginacion);
+        } catch(Exception e){
+            e.printStackTrace();
+            return null;
         }
 
-        actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
-        actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
 
-        return actividadDTO;
     }
 
+
+
+//    // Buscar actividades con cupo disponible
+//    @GetMapping("/con-cupo")
+//    public List<ActividadDTO> obtenerActividadesConCupoDisponible() {
+//        return
 }

@@ -1,13 +1,17 @@
 package com.uam.agendave.service;
 
 import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.ImagenDTO;
+import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,17 +23,15 @@ public class ActividadServiceImpl implements ActividadService {
     private final NombreActividadService nombreActividadService;
     private final LugarRepository lugarRepository;
     private final RegistroRepository registroRepository;
+    private final EstudianteRepository estudianteRepository;
 
-    public ActividadServiceImpl(
-            ActividadRepository actividadRepository,
-            NombreActividadRepository nombreActividadRepository,
-            LugarRepository lugarRepository,
-            RegistroRepository registroRepository) {
+    public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
         this.lugarRepository = lugarRepository;
         this.registroRepository = registroRepository;
+        this.estudianteRepository = estudianteRepository;
     }
 
     @Override
@@ -43,9 +45,7 @@ public class ActividadServiceImpl implements ActividadService {
             ActividadDTO actividadDTO = new ActividadDTO();
 
             ImageData imgData = actividad.getImagen();
-            if (imgData != null
-                    && imgData.getImagenBase64() != null
-                    && !imgData.getImagenBase64().trim().isEmpty()) {
+            if (imgData != null && imgData.getImagenBase64() != null && !imgData.getImagenBase64().trim().isEmpty()) {
                 ImagenDTO imagenDTO = new ImagenDTO();
                 imagenDTO.setNombre(actividad.getNombre());
                 imagenDTO.setImagenBase64(imgData.getImagenBase64());
@@ -65,12 +65,8 @@ public class ActividadServiceImpl implements ActividadService {
 
 
             // Manejar las relaciones: convertir IDs a nombres
-            actividadDTO.setNombreActividad(actividad.getNombreActividad() != null
-                    ? actividad.getNombreActividad().getNombre()
-                    : "Nombre no especificado");
-            actividadDTO.setLugar(actividad.getLugar() != null
-                    ? actividad.getLugar().getNombre()
-                    : "Lugar no especificado");
+            actividadDTO.setNombreActividad(actividad.getNombreActividad() != null ? actividad.getNombreActividad().getNombre() : "Nombre no especificado");
+            actividadDTO.setLugar(actividad.getLugar() != null ? actividad.getLugar().getNombre() : "Lugar no especificado");
 
             // Manejar convalidaciones
             actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
@@ -96,19 +92,14 @@ public class ActividadServiceImpl implements ActividadService {
 
         try {
             // Buscar o crear NombreActividad
-            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
-                    .stream()
-                    .findFirst()
-                    .orElseGet(() -> {
-                        NombreActividad nuevaNombreActividad = new NombreActividad();
-                        nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
-                        return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
-                    });
+            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad()).stream().findFirst().orElseGet(() -> {
+                NombreActividad nuevaNombreActividad = new NombreActividad();
+                nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
+                return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
+            });
             System.out.println(nombreActividad.getId());
 
-            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
-                    .stream().findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
             System.out.println(lugar.getId());
 
             Actividad actividad = getActividad(actividadDTO, nombreActividad, lugar);
@@ -125,9 +116,7 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividad = new Actividad();
 
         ImagenDTO imgDto = actividadDTO.getImagen();
-        if (imgDto != null
-                && imgDto.getImagenBase64() != null
-                && !imgDto.getImagenBase64().trim().isEmpty()) {
+        if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().trim().isEmpty()) {
 
             ImageData imageData = new ImageData();
             imageData.setNombre(imgDto.getNombre());
@@ -159,14 +148,12 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public Actividad buscarPorId(UUID id) {
-        return actividadRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
+        return actividadRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
     }
 
     @Override
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
-        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
-                .orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
+        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
         // Actualizar los campos simples
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
@@ -176,21 +163,15 @@ public class ActividadServiceImpl implements ActividadService {
         actividadExistente.setCupo(actividadDTO.getCupo());
 
         // Buscar o crear NombreActividad
-        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
-                .stream()
-                .findFirst()
-                .orElseGet(() -> {
-                    NombreActividad nuevaNombreActividad = new NombreActividad();
-                    nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
-                    return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
-                });
+        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad()).stream().findFirst().orElseGet(() -> {
+            NombreActividad nuevaNombreActividad = new NombreActividad();
+            nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
+            return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
+        });
 
         actividadExistente.setNombreActividad(nombreActividad);
 
-        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
         actividadExistente.setLugar(lugar);
 
         // Guardar los cambios
@@ -211,8 +192,6 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
 
-
-
     @Override
     public void eliminarActividad(UUID id) {
         if (!actividadRepository.existsById(id)) {
@@ -221,56 +200,40 @@ public class ActividadServiceImpl implements ActividadService {
         actividadRepository.deleteById(id);
     }
 
-    @Override
-    public List<ActividadDTO> buscarPorNombre(String nombre) {
-        List<Actividad> actividades = actividadRepository.findByNombreActividadNombre(nombre);
-        return actividades.stream()
-                .map(this::convertirAModelDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ActividadDTO> buscarPorLugar(UUID idLugar) {
-        List<Actividad> actividades = actividadRepository.findByLugarId(idLugar);
-        return actividades.stream()
-                .map(this::convertirAModelDTO)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public int getCupoRestante(UUID actividadID) {
-        Actividad act = actividadRepository.findById(actividadID)
-                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + actividadID));
+        Actividad act = actividadRepository.findById(actividadID).orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + actividadID));
         long inscritos = registroRepository.countByActividadId(actividadID);
         return act.getCupo() - (int) inscritos;
     }
 
+
     @Override
-    public List<ActividadDTO> buscarActividadesConCupoDisponible() {
-        List<Actividad> actividades = actividadRepository.findActividadesConCupoDisponible();
-        return actividades.stream()
-                .map(this::convertirAModelDTO)
+    @Transactional
+    public List<EstudianteDTO> obtenerListadoEstudiante(UUID idActividad) {
+
+        List<Registro> response = registroRepository.findByActividadId(idActividad);
+        List<String> cifsInvolucrados = response.stream()
+                .map(Registro::getCif).
+                toList();
+        Optional<List<Estudiante>> estudiantesPorActividad = estudianteRepository.findByCifIn(cifsInvolucrados);
+
+        return estudiantesPorActividad.get().stream()
+                .map(this::mapearEstudianteDTO)
                 .collect(Collectors.toList());
+
+
+        //TODO: Obtener el listado de los estudiantes a partir de un ID de actividad.
+
     }
 
     @Override
-    public Map<TipoConvalidacion, Integer> obtenerConvalidacionesPorActividad(UUID id) {
-        List<Object[]> resultados = actividadRepository.findConvalidacionesById(id);
+    public List<ActividadDTO> obtenerActividadesXPaginacion(UUID idActividad, int paginacion) {
 
-        // Convertir la lista en un mapa
-        return resultados.stream()
-                .collect(Collectors.toMap(
-                        resultado -> (TipoConvalidacion) resultado[0], // Clave (TipoConvalidacion)
-                        resultado -> (Integer) resultado[1]           // Valor (cantidadPermitida)
-                ));
-    }
+        // TODO: Obtener todas las actividades basadas en paginacion que manda el FRONT
 
-
-    @Override
-    public Integer obtenerTotalConvalidacionesMaximas(UUID id) {
-        Actividad actividad = actividadRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
-        return actividad.getTotalConvalidacionesPermitidas();
+        return List.of();
     }
 
 
@@ -293,6 +256,18 @@ public class ActividadServiceImpl implements ActividadService {
         actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
 
         return actividadDTO;
+    }
+
+    private EstudianteDTO mapearEstudianteDTO(Estudiante e) {
+        EstudianteDTO dto = new EstudianteDTO();
+        dto.setCif(e.getCif());
+        dto.setCorreo(e.getCorreo());
+        dto.setNombre(e.getNombres());
+        dto.setApellido(e.getApellidos());
+        dto.setFacultad(e.getFacultad());
+        dto.setCarrera(e.getCarrera());
+        // añade aquí todos los campos que necesite el front
+        return dto;
     }
 
 }

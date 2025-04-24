@@ -1,6 +1,7 @@
 package com.uam.agendave.service;
 
 import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.model.Actividad;
 import com.uam.agendave.model.TipoConvalidacion;
 
@@ -20,14 +21,9 @@ public interface ActividadService {
 
     void eliminarActividad(UUID id);
 
-    List<ActividadDTO> buscarPorNombre(String nombre);
-
-    List<ActividadDTO> buscarPorLugar(UUID idLugar);
-
     int getCupoRestante(UUID actividadID);
 
-    List<ActividadDTO> buscarActividadesConCupoDisponible(); // Ajustado para no requerir el parámetro cupo
-    Map<TipoConvalidacion, Integer> obtenerConvalidacionesPorActividad(UUID id);
-    Integer obtenerTotalConvalidacionesMaximas(UUID id);
+    List<EstudianteDTO> obtenerListadoEstudiante(UUID idActividad);
 
+    List<ActividadDTO> obtenerActividadesXPaginacion(UUID idActividad, int paginacion);
 }
