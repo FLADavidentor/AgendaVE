@@ -76,7 +76,7 @@ public class ActividadServiceImpl implements ActividadService {
             String base64Image = imgData.getImagenBase64(); // La cadena Base64 de la imagen
             int maxLength = 100; // Longitud máxima que deseas mostrar
 
-// Truncar la cadena si excede el límite
+
             if (base64Image.length() > maxLength) {
                 base64Image = base64Image.substring(0, maxLength) + "..."; // Añadir "..." al final si la cadena es truncada
             }
@@ -159,21 +159,16 @@ public class ActividadServiceImpl implements ActividadService {
     public List<EstudianteDTO> obtenerListadoEstudiante(UUID idActividad) {
 
         List<Registro> response = registroRepository.findByActividadId(idActividad);
-        List<String> cifsInvolucrados = response.stream()
-                .map(Registro::getCif).
-                toList();
+        List<String> cifsInvolucrados = response.stream().map(Registro::getCif).toList();
         Optional<List<Estudiante>> estudiantesPorActividad = estudianteRepository.findByCifIn(cifsInvolucrados);
 
-        return estudiantesPorActividad.get().stream()
-                .map(this::mapearEstudianteDTO)
-                .collect(Collectors.toList());
+        return estudiantesPorActividad.get().stream().map(this::mapearEstudianteDTO).collect(Collectors.toList());
 
     }
 
 
-
     @Override
-    public Page<ActividadDTO> obtenerActividades(Pageable pageable){
+    public Page<ActividadDTO> obtenerActividades(Pageable pageable) {
         return actividadRepository.findAll(pageable).map(this::convertirAModelDTO);
     }
 
@@ -224,21 +219,18 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
 
-        @Override
-        @Transactional
-        public void eliminarActividad(UUID id) {
+    @Override
+    @Transactional
+    public void eliminarActividad(UUID id) {
 
 
-            if (!actividadRepository.existsById(id)) {
-                throw new IllegalArgumentException("Actividad no encontrada con ID: " + id);
-            }
-            registroRepository.deleteByActividadId(id);
-            actividadRepository.deleteById(id);
-
+        if (!actividadRepository.existsById(id)) {
+            throw new IllegalArgumentException("Actividad no encontrada con ID: " + id);
         }
+        registroRepository.deleteByActividadId(id);
+        actividadRepository.deleteById(id);
 
-
-
+    }
 
 
     private ActividadDTO convertirAModelDTO(Actividad actividad) {

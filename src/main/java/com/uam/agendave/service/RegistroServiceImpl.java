@@ -3,6 +3,7 @@ package com.uam.agendave.service;
 import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.*;
+import com.uam.agendave.repository.EstudianteRepository;
 import com.uam.agendave.repository.RegistroRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Version;
@@ -10,19 +11,22 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class RegistroServiceImpl implements RegistroService {
 
     private final RegistroRepository repository;
+    private final EstudianteRepository estudianteRepository;
+    private final EmailService emailService;
 
-    public RegistroServiceImpl(RegistroRepository repository) {
+
+    public RegistroServiceImpl(RegistroRepository repository, EstudianteRepository estudianteRepository, EmailService emailService) {
         this.repository = repository;
+        this.estudianteRepository = estudianteRepository;
+        this.emailService = emailService;
+
     }
 
     @Override
@@ -52,8 +56,17 @@ public class RegistroServiceImpl implements RegistroService {
 
         repository.save(registro);
 
-
+        Optional<Estudiante> estudiante = estudianteRepository.findByCif(registroDTO.getCif());
+        String subject = "Confirmación de inscripción a la actividad";
+        String body = String.format("Hola %s, te has inscrito correctamente en la actividad:%n%s a las %s.",
+                estudiante.get().getNombres(),
+                registro.getActividad().getNombre(),
+                registro.getActividad().getFecha());
+        emailService.sendConfirmation(estudiante.get().getCorreo(), subject, body);
     }
+
+
+
 
     @Transactional()
     public Map<TipoConvalidacion, Integer> obtenerTotalCreditosPorTipo(String cif) {
