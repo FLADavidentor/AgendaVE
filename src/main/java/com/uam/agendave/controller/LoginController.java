@@ -27,8 +27,8 @@ public class LoginController {
         try {
 
 
-            EstudianteDTO estudianteData = estudianteService.loginUsuario(loginRequest);
-            return ResponseEntity.ok().body(estudianteData);
+            EstudianteDTO usuarioData = estudianteService.loginUsuario(loginRequest);
+            return ResponseEntity.ok().body(usuarioData);
 
 
         } catch (IllegalStateException e) {
@@ -50,5 +50,17 @@ public class LoginController {
                     .body(Map.of("error","Error interno del servidor"));
         }
 
+    }
+
+    @PostMapping("/login_admin")
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<?> obtenerInformacionAdmin(@RequestBody LoginRequest loginRequest) {
+        try {
+
+            return estudianteService.loginUsuarioAdmin(loginRequest);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

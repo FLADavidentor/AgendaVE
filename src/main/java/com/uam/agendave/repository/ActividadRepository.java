@@ -12,6 +12,8 @@ public interface ActividadRepository extends JpaRepository<Actividad, UUID> {
 
     Page<Actividad> findAll(Pageable pageable);
 
+    List<Actividad> findByEstado(Boolean estado);
+
     List<Actividad> findByNombreActividadId(UUID nombreActividadId);
 
 

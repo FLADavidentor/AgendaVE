@@ -8,8 +8,10 @@ import com.uam.agendave.dto.UsuarioDTO;
 import com.uam.agendave.model.ApiResponse;
 import com.uam.agendave.model.Estudiante;
 import com.uam.agendave.repository.EstudianteRepository;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -130,6 +132,31 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
 
+    @Override
+    public ResponseEntity<?> loginUsuarioAdmin(LoginRequest loginRequest) {
+        try {
+            Optional<Estudiante> estudiante = estudianteRepository.findByCif(loginRequest.getCif());
+
+            if (estudiante.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado");
+            }
+            if (!estudiante.get().getPassword().equals(loginRequest.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Contraseña incorrecta");
+            }
+            if (!estudiante.get().getTipo().equals("Admin")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("no tiene privilegios");
+            }
+
+            EstudianteDTO estudianteDTO = mapearEstudianteDTO(estudiante.get());
+            return ResponseEntity.status(HttpStatus.OK).body(estudianteDTO);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
 
     private Estudiante mapearAEstudiante(TestDTO estudianteData, String password) {
         Estudiante estudiante = new Estudiante();
@@ -157,8 +184,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return estudiante;
     }
 
-    private EstudianteDTO mapearEstudianteDTO(Estudiante estudiante)
-    {
+    private EstudianteDTO mapearEstudianteDTO(Estudiante estudiante) {
         EstudianteDTO estudianteDTO = new EstudianteDTO();
 
         estudianteDTO.setApellido(estudiante.getApellidos());
@@ -169,7 +195,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         estudianteDTO.setCarrera(estudiante.getCarrera());
 
         return estudianteDTO;
-
 
 
     }

@@ -29,4 +29,6 @@ public interface ActividadService {
 
 
     Page<ActividadDTO> obtenerActividades(Pageable pageable);
+
+    List<ActividadDTO> obtenerActividadesActivas();
 }

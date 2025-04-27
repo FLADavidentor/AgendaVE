@@ -32,6 +32,12 @@ public class ActividadController {
         return actividadService.obtenerTodas();
     }
 
+    @GetMapping("/get_active")
+    public List<ActividadDTO> obtenerActividad() {
+        return actividadService.obtenerActividadesActivas();
+    }
+
+
     @CrossOrigin(origins = "*")
     @PostMapping("/create")
     public void crearActividad(@RequestBody ActividadDTO actividadDTO) {

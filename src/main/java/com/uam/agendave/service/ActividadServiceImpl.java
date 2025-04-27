@@ -36,56 +36,25 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
+    @Transactional
     public List<ActividadDTO> obtenerTodas() {
         // Obtener todas las actividades desde el repositorio
+
         List<Actividad> actividades = actividadRepository.findAll();
 
         // Convertir las entidades a DTOs
-        return actividades.stream().map(actividad -> {
+        return actividades.stream().map(this::convertirAModelDTO).collect(Collectors.toList());
+    }
 
-            ActividadDTO actividadDTO = new ActividadDTO();
+    @Override
+    @Transactional
+    public List<ActividadDTO> obtenerActividadesActivas() {
+        // Obtener todas las actividades desde el repositorio
 
-            ImageData imgData = actividad.getImagen();
-            if (imgData != null && imgData.getImagenBase64() != null && !imgData.getImagenBase64().trim().isEmpty()) {
-                ImagenDTO imagenDTO = new ImagenDTO();
-                imagenDTO.setNombre(actividad.getNombre());
-                imagenDTO.setImagenBase64(imgData.getImagenBase64());
-                actividadDTO.setImagen(imagenDTO);
-            } else {
-                // Opcional: asegurarte de que la entidad actividad permita imagen null
-                actividadDTO.setImagen(null);
-            }
+        List<Actividad> actividades = actividadRepository.findByEstado(true);
 
-            actividadDTO.setId(actividad.getId());
-            actividadDTO.setDescripcion(actividad.getDescripcion());
-            actividadDTO.setFecha(actividad.getFecha());
-            actividadDTO.setHoraInicio(actividad.getHoraInicio());
-            actividadDTO.setHoraFin(actividad.getHoraFin());
-            actividadDTO.setEstado(actividad.isEstado());
-            actividadDTO.setCupo(actividad.getCupo());
-
-
-            // Manejar las relaciones: convertir IDs a nombres
-            actividadDTO.setNombreActividad(actividad.getNombreActividad() != null ? actividad.getNombreActividad().getNombre() : "Nombre no especificado");
-            actividadDTO.setLugar(actividad.getLugar() != null ? actividad.getLugar().getNombre() : "Lugar no especificado");
-
-            // Manejar convalidaciones
-            actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
-            actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
-
-            String base64Image = imgData.getImagenBase64(); // La cadena Base64 de la imagen
-            int maxLength = 100; // Longitud máxima que deseas mostrar
-
-
-            if (base64Image.length() > maxLength) {
-                base64Image = base64Image.substring(0, maxLength) + "..."; // Añadir "..." al final si la cadena es truncada
-            }
-
-            System.out.println("Base64 de la imagen (truncado): " + base64Image);
-
-
-            return actividadDTO;
-        }).collect(Collectors.toList());
+        // Convertir las entidades a DTOs
+        return actividades.stream().map(this::convertirAModelDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -172,6 +141,8 @@ public class ActividadServiceImpl implements ActividadService {
         return actividadRepository.findAll(pageable).map(this::convertirAModelDTO);
     }
 
+
+
     @Override
     public Actividad buscarPorId(UUID id) {
         return actividadRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
@@ -257,6 +228,8 @@ public class ActividadServiceImpl implements ActividadService {
         actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
 
         return actividadDTO;
+
+
     }
 
     private EstudianteDTO mapearEstudianteDTO(Estudiante e) {
