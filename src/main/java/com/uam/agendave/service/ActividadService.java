@@ -7,6 +7,7 @@ import com.uam.agendave.model.TipoConvalidacion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,15 +21,17 @@ public interface ActividadService {
     Actividad buscarPorId(UUID id);
 
     ActividadDTO actualizarActividad(ActividadDTO actividadDTO);
-//
+
     void eliminarActividad(UUID id);
 
     int getCupoRestante(UUID actividadID);
 
     List<EstudianteDTO> obtenerListadoEstudiante(UUID idActividad);
 
-
     Page<ActividadDTO> obtenerActividades(Pageable pageable);
 
     List<ActividadDTO> obtenerActividadesActivas();
+
+
+
 }

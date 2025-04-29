@@ -2,6 +2,7 @@ package com.uam.agendave.service;
 
 import com.uam.agendave.dto.ActividadInscritaDTO;
 import com.uam.agendave.dto.AsistenciaDTO;
+import com.uam.agendave.dto.MeetingDetailsDTO;
 import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.EstudianteRepository;
@@ -63,10 +64,22 @@ public class RegistroServiceImpl implements RegistroService {
                 estudiante.get().getNombres(),
                 registro.getActividad().getNombre(),
                 registro.getActividad().getFecha());
-        emailService.sendConfirmation(estudiante.get().getCorreo(), subject, body);
+
+        MeetingDetailsDTO meeting = new MeetingDetailsDTO();
+        meeting.setTitle(registro.getActividad().getNombre());
+        meeting.setDate(registro.getActividad().getFecha().toString());
+        meeting.setLocation(registro.getActividad().getLugar().getNombre());
+        meeting.setSenderName("Equipo de Vida Estudiantil");
+        meeting.setPurpose("Informarte que has sido inscrito correctamente en la actividad programada y brindarte los detalles necesarios para asegurar tu participación.");
+        meeting.setTime(registro.getActividad().getHoraInicio().toString());
+//        meeting.setSenderName("Equipo de Vida Estudiantil");
+
+
+//        emailService.sendConfirmation(estudiante.get().getCorreo(), subject, body);
+
+
+        emailService.sendMeetingInvitation(estudiante.get().getCorreo(), subject, meeting );
     }
-
-
 
 
     @Transactional()

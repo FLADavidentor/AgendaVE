@@ -3,6 +3,7 @@ package com.uam.agendave.controller;
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.service.ActividadService;
+import com.uam.agendave.service.ActivityCleanupService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +22,12 @@ import java.util.UUID;
 @RequestMapping("/actividad")
 public class ActividadController {
     private final ActividadService actividadService;
+    private final ActivityCleanupService activityCleanupService;
 
-    public ActividadController(ActividadService actividadService
-    ) {
+    public ActividadController(ActividadService actividadService, ActivityCleanupService activityCleanupService)
+    {
         this.actividadService = actividadService;
+        this.activityCleanupService = activityCleanupService;
     }
 
     @GetMapping("/all")
@@ -53,6 +56,11 @@ public class ActividadController {
     @GetMapping("/{id}/cupo_restante")
     public int cupoRestante(@PathVariable UUID id) {
         return actividadService.getCupoRestante(id);
+    }
+
+    @GetMapping("/reiniciar_estado")
+    public void reiniciarEstado() {
+        activityCleanupService.deactivatePastActivities();
     }
 
     @PostMapping("/listado_estudiante/{id_actividad}")

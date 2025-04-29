@@ -149,6 +149,7 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
+    @Transactional
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
         Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
