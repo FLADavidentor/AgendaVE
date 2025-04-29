@@ -24,8 +24,7 @@ public class ActividadController {
     private final ActividadService actividadService;
     private final ActivityCleanupService activityCleanupService;
 
-    public ActividadController(ActividadService actividadService, ActivityCleanupService activityCleanupService)
-    {
+    public ActividadController(ActividadService actividadService, ActivityCleanupService activityCleanupService) {
         this.actividadService = actividadService;
         this.activityCleanupService = activityCleanupService;
     }
@@ -38,6 +37,15 @@ public class ActividadController {
     @GetMapping("/get_active")
     public List<ActividadDTO> obtenerActividad() {
         return actividadService.obtenerActividadesActivas();
+    }
+
+    @GetMapping("/get_actividad_nombre")
+    public List<ActividadDTO> obtenerActividadNombre(@RequestParam String nombre) {
+        try {
+            return actividadService.obtenerActividadesPorNombre(nombre);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

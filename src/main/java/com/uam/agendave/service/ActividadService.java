@@ -33,5 +33,5 @@ public interface ActividadService {
     List<ActividadDTO> obtenerActividadesActivas();
 
 
-
+    List<ActividadDTO> obtenerActividadesPorNombre(String nombre);
 }

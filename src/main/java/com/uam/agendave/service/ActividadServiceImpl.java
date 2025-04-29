@@ -58,6 +58,18 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
+    @Transactional
+    public List<ActividadDTO> obtenerActividadesPorNombre(String nombre) {
+        try {
+            List<Actividad> actividades = actividadRepository.findByNombre(nombre);
+
+            return actividades.stream().map(this::convertirAModelDTO).collect(Collectors.toList());
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void guardarActividad(ActividadDTO actividadDTO) throws Exception {
 
         try {

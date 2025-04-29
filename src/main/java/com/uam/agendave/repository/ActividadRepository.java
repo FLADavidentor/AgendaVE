@@ -18,5 +18,7 @@ public interface ActividadRepository extends JpaRepository<Actividad, UUID> {
 
     List<Actividad> findByNombreActividadId(UUID nombreActividadId);
 
+    List<Actividad> findByNombre(String nombreActividad);
+
     List<Actividad> findByFechaBeforeAndEstadoTrue(LocalDate date);
 }
