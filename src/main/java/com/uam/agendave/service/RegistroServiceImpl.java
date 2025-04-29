@@ -1,5 +1,6 @@
 package com.uam.agendave.service;
 
+import com.uam.agendave.dto.ActividadInscritaDTO;
 import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.RegistroDTO;
 import com.uam.agendave.model.*;
@@ -101,15 +102,18 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
 
-    @Transactional
-    public List<Actividad> buscarActividadesInscritasPorCif(String cif) {
-
-        List<Actividad> registrosDelEstudiante = repository.findByCif(cif).stream().map(Registro::getActividad).collect(Collectors.toList());
-        System.out.println(registrosDelEstudiante);
-        return registrosDelEstudiante;
-
-    }
-
     //Conocer los estudiantes que esten inscritos a una actividad
+    @Transactional
+    public List<ActividadInscritaDTO> buscarActividadesInscritasPorCif(String cif) {
+        return repository.findByCif(cif)
+                .stream()
+                .map(registro -> {
+                    ActividadInscritaDTO dto = new ActividadInscritaDTO();
+                    dto.setActividad(registro.getActividad());
+                    dto.setTipoConvalidacion(registro.getTipoConvalidacion().name()); // suponiendo que TipoConvalidacion es Enum
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
 }
