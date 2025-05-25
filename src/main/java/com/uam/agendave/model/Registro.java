@@ -16,8 +16,9 @@ import java.util.Map;
 @Setter
 public class Registro extends Identifiable {
 
-    @Column(nullable = false)
-    private String cif;
+    @ManyToOne
+    @JoinColumn(name= "cif", nullable = false)
+    private Estudiante estudiante;
 
     @ManyToOne
     @JoinColumn(name = "idActividad", nullable = false)

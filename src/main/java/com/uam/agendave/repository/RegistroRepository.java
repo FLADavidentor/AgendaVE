@@ -13,13 +13,13 @@ import java.util.UUID;
 
 public interface RegistroRepository extends JpaRepository<Registro, UUID> {
 
-    List<Registro> findByCif(String cif);
+    List<Registro> findByEstudianteCif(String cif);
 
     List<Registro> findByActividadId(UUID idActividad);
 
     long countByActividadId(UUID idActividad);
 
-    Optional<Registro> findByCifAndActividadId(String cif, UUID idActividad);
+    Optional<Registro> findByEstudianteCifAndActividadId(String cif, UUID idActividad); // ✅ WORKS
     @Transactional
     void deleteByActividadId(UUID idActividad);
 }

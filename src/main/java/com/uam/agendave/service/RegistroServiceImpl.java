@@ -49,7 +49,7 @@ public class RegistroServiceImpl implements RegistroService {
         Registro registro = new Registro();
 
         registro.setActividad(actividad);
-        registro.setCif(registroDTO.getCif());
+        registro.setEstudiante(RegistroHelper.getEstudianteByCif(registroDTO.getCif())); // ✅
         registro.setTransporte(registroDTO.getTransporte());
         registro.setTotalConvalidado(variable.values().iterator().next());
         registro.setEstadoAsistencia(EstadoAsistencia.AUSENTE);
@@ -84,7 +84,7 @@ public class RegistroServiceImpl implements RegistroService {
 
     @Transactional()
     public Map<TipoConvalidacion, Integer> obtenerTotalCreditosPorTipo(String cif) {
-        return repository.findByCif(cif).stream()
+        return repository.findByEstudianteCif(cif).stream()
                 // filtramos sólo los registros con asistencia presente
                 .filter(r -> r.getEstadoAsistencia() == EstadoAsistencia.PRESENTE)
                 // agrupamos y sumamos
@@ -99,7 +99,7 @@ public class RegistroServiceImpl implements RegistroService {
     @Transactional
     public void marcarAsistencia(AsistenciaDTO asistenciaDTO) {
         Registro registro = repository
-                .findByCifAndActividadId(asistenciaDTO.getCif(), asistenciaDTO.getIdActividad())
+                .findByEstudianteCifAndActividadId(asistenciaDTO.getCif(), asistenciaDTO.getIdActividad())
                 .orElseThrow(() ->
                         new EntityNotFoundException(
                                 "No existe registro para CIF=" + asistenciaDTO.getCif() +
@@ -118,7 +118,7 @@ public class RegistroServiceImpl implements RegistroService {
     //Conocer los estudiantes que esten inscritos a una actividad
     @Transactional
     public List<ActividadInscritaDTO> buscarActividadesInscritasPorCif(String cif) {
-        return repository.findByCif(cif)
+        return repository.findByEstudianteCif(cif)
                 .stream()
                 .map(registro -> {
                     ActividadInscritaDTO dto = new ActividadInscritaDTO();

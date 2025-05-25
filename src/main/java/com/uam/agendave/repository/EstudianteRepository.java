@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface EstudianteRepository extends JpaRepository<Estudiante, UUID> {
 
-    Optional findByCif(String cif);
+    Optional<Estudiante> findByCif(String cif);
     Optional<List<Estudiante>> findByCifIn(List<String> cifs);
 
 }

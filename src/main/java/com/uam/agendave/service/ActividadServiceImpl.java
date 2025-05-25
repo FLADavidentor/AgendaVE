@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 public class ActividadServiceImpl implements ActividadService {
 
@@ -43,7 +45,7 @@ public class ActividadServiceImpl implements ActividadService {
         List<Actividad> actividades = actividadRepository.findAll();
 
         // Convertir las entidades a DTOs
-        return actividades.stream().map(this::convertirAModelDTO).collect(Collectors.toList());
+        return actividades.stream().map(this::convertirAModelDTO).collect(toList());
     }
 
     @Override
@@ -54,7 +56,7 @@ public class ActividadServiceImpl implements ActividadService {
         List<Actividad> actividades = actividadRepository.findByEstado(true);
 
         // Convertir las entidades a DTOs
-        return actividades.stream().map(this::convertirAModelDTO).collect(Collectors.toList());
+        return actividades.stream().map(this::convertirAModelDTO).collect(toList());
     }
 
     @Override
@@ -63,7 +65,7 @@ public class ActividadServiceImpl implements ActividadService {
         try {
             List<Actividad> actividades = actividadRepository.findByNombre(nombre);
 
-            return actividades.stream().map(this::convertirAModelDTO).collect(Collectors.toList());
+            return actividades.stream().map(this::convertirAModelDTO).collect(toList());
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
@@ -140,10 +142,11 @@ public class ActividadServiceImpl implements ActividadService {
     public List<EstudianteDTO> obtenerListadoEstudiante(UUID idActividad) {
 
         List<Registro> response = registroRepository.findByActividadId(idActividad);
-        List<String> cifsInvolucrados = response.stream().map(Registro::getCif).toList();
+        List<String> cifsInvolucrados = response.stream().map(r -> r.getEstudiante().getCif())
+                .toList();
         Optional<List<Estudiante>> estudiantesPorActividad = estudianteRepository.findByCifIn(cifsInvolucrados);
 
-        return estudiantesPorActividad.get().stream().map(this::mapearEstudianteDTO).collect(Collectors.toList());
+        return estudiantesPorActividad.get().stream().map(this::mapearEstudianteDTO).collect(toList());
 
     }
 
