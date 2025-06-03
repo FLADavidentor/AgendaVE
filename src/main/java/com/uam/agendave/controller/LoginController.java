@@ -2,65 +2,54 @@ package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.LoginRequest;
+import com.uam.agendave.mapper.EstudianteMapper;
+import com.uam.agendave.model.Usuario;
+import com.uam.agendave.model.Estudiante;
+import com.uam.agendave.repository.UsuarioRepository;
+import com.uam.agendave.repository.EstudianteRepository;
 import com.uam.agendave.service.UsuarioService;
-import jakarta.persistence.EntityNotFoundException;
+import com.uam.agendave.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/usuario")
 public class LoginController {
 
-    private final UsuarioService estudianteService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    public LoginController(UsuarioService estudianteService) {
-        this.estudianteService = estudianteService;
-    }
-
+    @Autowired
+    private UsuarioService usuarioService;
 
     @PostMapping("/login")
-    @CrossOrigin(origins = "*")
-    public ResponseEntity<?> obtenerInformacionEstudiante(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginEstudiante(@RequestBody LoginRequest loginRequest) {
         try {
+            EstudianteDTO dto = usuarioService.loginUsuario(loginRequest);
+            String token = jwtUtil.generateToken(dto.getCif(), "ESTUDIANTE");
 
-
-            EstudianteDTO usuarioData = estudianteService.loginUsuario(loginRequest);
-            return ResponseEntity.ok().body(usuarioData);
-
-
-        } catch (IllegalStateException e) {
-
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
-
-        }catch (EntityNotFoundException e) {
-
-
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
+            return ResponseEntity.ok(Map.of(
+                    "token", token,
+                    "rol", "ESTUDIANTE",
+                    "usuario", dto
+            ));
         } catch (Exception e) {
-
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR) // 500
-                    .body(Map.of("error","Error interno del servidor"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
-
     }
 
     @PostMapping("/login_admin")
-    @CrossOrigin(origins = "*")
-    public ResponseEntity<?> obtenerInformacionAdmin(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginAdmin(@RequestBody LoginRequest loginRequest) {
         try {
-
-            return estudianteService.loginUsuarioAdmin(loginRequest);
-
+            return usuarioService.loginUsuarioAdmin(loginRequest);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 }

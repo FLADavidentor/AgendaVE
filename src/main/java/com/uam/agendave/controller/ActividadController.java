@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/actividad")
 public class ActividadController {
@@ -28,17 +29,22 @@ public class ActividadController {
         this.actividadService = actividadService;
         this.activityCleanupService = activityCleanupService;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
+    
     @GetMapping("/all")
     public List<ActividadDTO> obtenerTodas() {
         return actividadService.obtenerTodas();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
+    
     @GetMapping("/get_active")
     public List<ActividadDTO> obtenerActividad() {
         return actividadService.obtenerActividadesActivas();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
+    
     @GetMapping("/get_actividad_nombre")
     public List<ActividadDTO> obtenerActividadNombre(@RequestParam String nombre) {
         try {
@@ -48,8 +54,8 @@ public class ActividadController {
         }
     }
 
-
-    @CrossOrigin(origins = "*")
+    
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public void crearActividad(@RequestBody ActividadDTO actividadDTO) {
         try {
@@ -60,17 +66,22 @@ public class ActividadController {
         }
     }
 
-    @CrossOrigin(origins = "*")
+    
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @GetMapping("/{id}/cupo_restante")
     public int cupoRestante(@PathVariable UUID id) {
         return actividadService.getCupoRestante(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    
     @GetMapping("/reiniciar_estado")
     public void reiniciarEstado() {
         activityCleanupService.deactivatePastActivities();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    
     @PostMapping("/listado_estudiante/{id_actividad}")
     public List<EstudianteDTO> listadoActividad(@PathVariable UUID id_actividad) {
         try {
@@ -81,6 +92,8 @@ public class ActividadController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    
     @GetMapping("/obtener_actividades")
     public ResponseEntity<Page<ActividadDTO>> obtenerActividades(
             @RequestParam(defaultValue = "0") int page,
@@ -105,7 +118,8 @@ public class ActividadController {
 
 
     // Actualizar actividad existente
-    @CrossOrigin(origins = "*")
+    
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<ActividadDTO> actualizarActividad(@PathVariable UUID id, @RequestBody ActividadDTO actividadDTO) {
         actividadDTO.setId(id);
@@ -117,6 +131,8 @@ public class ActividadController {
     }
 
     // Eliminar actividad
+    @PreAuthorize("hasRole('ADMIN')")
+    
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminarActividad(@PathVariable UUID id) {
         actividadService.eliminarActividad(id);

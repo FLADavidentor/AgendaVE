@@ -8,6 +8,7 @@ import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.RegistroService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/asistencia")
-@CrossOrigin(origins = "*")
+
 public class AsistenciaController {
 
     private final RegistroService registroService;
@@ -30,6 +31,7 @@ public class AsistenciaController {
 
     // Tiene que llegar un DTO que contenga el CIF del estudiante y el ID de la actividad
     // Como parametros me tienen que mandar un: Cif: String - Id de Actividad: String - Transporte:Boolean
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @PostMapping("/confirmar_inscripcion")
     public ResponseEntity inscribirActividad(@RequestBody RegistroDTO registroDTO) {
 
@@ -41,6 +43,7 @@ public class AsistenciaController {
         return ResponseEntity.status(201).body(null);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @PostMapping("/{cif}/actividades_inscritas")
     public ResponseEntity<List<?>> actividadesInscritas(@PathVariable String cif) {
         try {
@@ -52,6 +55,7 @@ public class AsistenciaController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @PostMapping("/marcar_asistencia")
     public ResponseEntity marcarAsistencia(@RequestBody AsistenciaDTO asistenciaDTO) {
 

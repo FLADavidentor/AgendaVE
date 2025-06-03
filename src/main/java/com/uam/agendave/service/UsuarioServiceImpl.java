@@ -1,67 +1,77 @@
 package com.uam.agendave.service;
 
-
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.LoginRequest;
 import com.uam.agendave.dto.TestDTO;
-import com.uam.agendave.dto.UsuarioDTO;
+import com.uam.agendave.mapper.EstudianteMapper;
 import com.uam.agendave.model.ApiResponse;
 import com.uam.agendave.model.Estudiante;
+import com.uam.agendave.model.Usuario;
 import com.uam.agendave.repository.EstudianteRepository;
-import org.apache.coyote.Response;
+import com.uam.agendave.repository.UsuarioRepository;
+import com.uam.agendave.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-
     private static final String BASE_URL = "https://uvirtual.uam.edu.ni:442/uambiblioapi/User/";
+
     private final RestClient restClient;
     private final EstudianteRepository estudianteRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EstudianteMapper estudianteMapper;
 
-    public UsuarioServiceImpl(RestClient restClient, EstudianteRepository estudianteRepository) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    public UsuarioServiceImpl(RestClient restClient, EstudianteRepository estudianteRepository,
+                              UsuarioRepository usuarioRepository, EstudianteMapper estudianteMapper) {
         this.restClient = restClient;
         this.estudianteRepository = estudianteRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.estudianteMapper = estudianteMapper;
+        this.jwtUtil = new JwtUtil();
     }
 
+    @Transactional
     @Override
     public EstudianteDTO loginUsuario(LoginRequest loginRequest) {
         try {
             Optional<Estudiante> estudiante = estudianteRepository.findByCif(loginRequest.getCif());
 
-            if (estudiante.isPresent()
-                    && estudiante.get().getPassword().equals(loginRequest.getPassword())) {
-
-
-                EstudianteDTO estudianteDTO = mapearEstudianteDTO(estudiante.get());
-                return estudianteDTO;
-
-
+            if (estudiante.isPresent() && passwordEncoder.matches(loginRequest.getPassword(), estudiante.get().getPassword())) {
+                return estudianteMapper.toDTO(estudiante.get());
             } else {
                 String token = autenticarEstudiante(loginRequest);
                 TestDTO estudianteData = obtenerInformacionEstudiante(token, loginRequest);
 
-                Estudiante estudiantePersistencia = mapearAEstudiante(estudianteData, loginRequest.getPassword());
+                Estudiante nuevoEstudiante = estudianteMapper.toEntity(estudianteData,loginRequest.getPassword());
+                nuevoEstudiante.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
+                estudianteRepository.save(nuevoEstudiante);
+                System.out.println("Saving new estudiante: " + nuevoEstudiante.getCif());
+                estudianteRepository.save(nuevoEstudiante);
 
-                estudianteRepository.save(estudiantePersistencia);
-                EstudianteDTO estudianteDTO = mapearEstudianteDTO(estudiantePersistencia);
 
-                return estudianteDTO;
+                return estudianteMapper.toDTO(nuevoEstudiante);
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,37 +83,25 @@ public class UsuarioServiceImpl implements UsuarioService {
     public String autenticarEstudiante(LoginRequest loginRequest) {
         String loginUrl = BASE_URL + "login";
 
-        // Crear el cuerpo de la solicitud
         Map<String, String> requestBody = Map.of(
                 "cif", loginRequest.getCif(),
                 "password", loginRequest.getPassword()
         );
 
         try {
-            // Realizar la solicitud POST con RestClient
-            String token = restClient.method(HttpMethod.POST)
+            return restClient.method(HttpMethod.POST)
                     .uri(loginUrl)
                     .header(HttpHeaders.CONTENT_TYPE, "application/json")
                     .body(requestBody)
                     .retrieve()
                     .body(String.class);
 
-            return token;
-
-        } catch (HttpClientErrorException e) {
-            // Manejo de errores 4xx
-            System.err.println("Error HTTP (4xx): " + e.getStatusCode());
-            System.err.println("Cuerpo de la respuesta: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Error de autenticación: " + e.getMessage(), e);
-        } catch (HttpServerErrorException e) {
-            // Manejo de errores 5xx
-            System.err.println("Error HTTP (5xx): " + e.getStatusCode());
-            System.err.println("Cuerpo de la respuesta: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Error en el servidor externo: " + e.getMessage(), e);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            System.err.println("Error HTTP: " + e.getStatusCode());
+            System.err.println("Respuesta: " + e.getResponseBodyAsString());
+            throw new RuntimeException("Error autenticando: " + e.getMessage(), e);
         } catch (Exception e) {
-            // Manejo de errores generales
-            System.err.println("Error inesperado al comunicarse con la API externa: " + e.getMessage());
-            throw new RuntimeException("Error desconocido: " + e.getMessage(), e);
+            throw new RuntimeException("Error inesperado: " + e.getMessage(), e);
         }
     }
 
@@ -112,7 +110,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         String infoUrl = BASE_URL + "GetStudentInformation?cif=" + loginRequest.getCif();
 
         try {
-            // Solicitud GET para obtener información del estudiante
             ResponseEntity<ApiResponse> response = restClient.get()
                     .uri(infoUrl)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -121,82 +118,41 @@ public class UsuarioServiceImpl implements UsuarioService {
 
             ApiResponse body = response.getBody();
             if (body != null && body.isSuccess() && !body.getData().isEmpty()) {
-                TestDTO estudiante = body.getData().get(0);
-                return estudiante;
+                System.out.println("response body: " + response.getBody());
+                return body.getData().get(0);
             }
-
             return null;
 
         } catch (Exception e) {
-            throw new RuntimeException("Error al obtener información del estudiante: " + e.getMessage(), e);
+            throw new RuntimeException("Error obteniendo datos del estudiante: " + e.getMessage(), e);
         }
     }
 
     @Override
     public ResponseEntity<?> loginUsuarioAdmin(LoginRequest loginRequest) {
-        try {
-            Optional<Estudiante> estudiante = estudianteRepository.findByCif(loginRequest.getCif());
+        Optional<Usuario> adminOpt = usuarioRepository.findByCorreo(loginRequest.getCif());
 
-            if (estudiante.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado");
-            }
-            if (!estudiante.get().getPassword().equals(loginRequest.getPassword())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Contraseña incorrecta");
-            }
-            if (!estudiante.get().getTipo().equals("Admin")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("no tiene privilegios");
-            }
-
-            EstudianteDTO estudianteDTO = mapearEstudianteDTO(estudiante.get());
-            return ResponseEntity.status(HttpStatus.OK).body(estudianteDTO);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+        if (adminOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Administrador no encontrado"));
         }
-    }
 
+        Usuario admin = adminOpt.get();
 
-    private Estudiante mapearAEstudiante(TestDTO estudianteData, String password) {
-        Estudiante estudiante = new Estudiante();
+        if (!passwordEncoder.matches(loginRequest.getPassword(), admin.getContrasena())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Contraseña incorrecta"));
+        }
 
-        String tel = estudianteData.getTelefono() != null ? estudianteData.getTelefono().toString() : "";
-        String tipo = estudianteData.getTipo() != null ? estudianteData.getTipo().toString() : "";
-        String correo = estudianteData.getCorreo() != null ? estudianteData.getCorreo().toString() : "";
-        String sexo = estudianteData.getSexo() != null ? estudianteData.getSexo().toString() : "";
-        String carrera = estudianteData.getCarrera() != null ? estudianteData.getCarrera().toString() : "";
-        String facultad = estudianteData.getFacultad() != null ? estudianteData.getFacultad().toString() : "";
+        String token = jwtUtil.generateToken(admin.getCorreo(), "ADMIN");
 
-
-        estudiante.setCif((String) estudianteData.getCif());
-        estudiante.setNombres((String) estudianteData.getNombres());
-        estudiante.setApellidos((String) estudianteData.getApellidos());
-
-        estudiante.setTipo(tipo);
-        estudiante.setCorreo(correo);
-        estudiante.setSexo(sexo);
-        estudiante.setTelefono(tel);
-        estudiante.setCarrera(carrera);
-        estudiante.setFacultad(facultad);
-        estudiante.setPassword(password);
-
-        return estudiante;
-    }
-
-    private EstudianteDTO mapearEstudianteDTO(Estudiante estudiante) {
-        EstudianteDTO estudianteDTO = new EstudianteDTO();
-
-        estudianteDTO.setApellido(estudiante.getApellidos());
-        estudianteDTO.setNombre(estudiante.getNombres());
-        estudianteDTO.setCif(estudiante.getCif());
-        estudianteDTO.setCorreo(estudiante.getCorreo());
-        estudianteDTO.setFacultad(estudiante.getFacultad());
-        estudianteDTO.setCarrera(estudiante.getCarrera());
-
-        return estudianteDTO;
-
-
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "rol", "ADMIN",
+                "usuario", Map.of(
+                        "correo", admin.getCorreo(),
+                        "nombre", admin.getNombre(),
+                        "apellido", admin.getApellido()
+                )
+        ));
     }
 
 }

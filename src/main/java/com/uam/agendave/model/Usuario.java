@@ -4,6 +4,7 @@ package com.uam.agendave.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Administrador extends Identifiable {
+public class Usuario extends Identifiable {
 
     @Column(nullable = false, unique = true)
     private String username;

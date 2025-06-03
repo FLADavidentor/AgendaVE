@@ -3,6 +3,7 @@ package com.uam.agendave.service;
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.ImagenDTO;
+import com.uam.agendave.mapper.EstudianteMapper;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import com.uam.agendave.mapper.ActividadMapper;
 
 @Service
 public class ActividadServiceImpl implements ActividadService {
@@ -27,6 +29,8 @@ public class ActividadServiceImpl implements ActividadService {
     private final LugarRepository lugarRepository;
     private final RegistroRepository registroRepository;
     private final EstudianteRepository estudianteRepository;
+    private final ActividadMapper actividadMapper;
+    private final EstudianteMapper estudianteMapper;
 
     public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository) {
         this.actividadRepository = actividadRepository;
@@ -35,6 +39,8 @@ public class ActividadServiceImpl implements ActividadService {
         this.lugarRepository = lugarRepository;
         this.registroRepository = registroRepository;
         this.estudianteRepository = estudianteRepository;
+        this.actividadMapper = new ActividadMapper();
+        this.estudianteMapper = new EstudianteMapper();
     }
 
     @Override
@@ -45,7 +51,7 @@ public class ActividadServiceImpl implements ActividadService {
         List<Actividad> actividades = actividadRepository.findAll();
 
         // Convertir las entidades a DTOs
-        return actividades.stream().map(this::convertirAModelDTO).collect(toList());
+        return actividades.stream().map(actividadMapper::toDTO).collect(toList());
     }
 
     @Override
@@ -56,7 +62,7 @@ public class ActividadServiceImpl implements ActividadService {
         List<Actividad> actividades = actividadRepository.findByEstado(true);
 
         // Convertir las entidades a DTOs
-        return actividades.stream().map(this::convertirAModelDTO).collect(toList());
+        return actividades.stream().map(actividadMapper::toDTO).collect(toList());
     }
 
     @Override
@@ -65,7 +71,7 @@ public class ActividadServiceImpl implements ActividadService {
         try {
             List<Actividad> actividades = actividadRepository.findByNombre(nombre);
 
-            return actividades.stream().map(this::convertirAModelDTO).collect(toList());
+            return actividades.stream().map(actividadMapper::toDTO).collect(toList());
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
@@ -146,14 +152,14 @@ public class ActividadServiceImpl implements ActividadService {
                 .toList();
         Optional<List<Estudiante>> estudiantesPorActividad = estudianteRepository.findByCifIn(cifsInvolucrados);
 
-        return estudiantesPorActividad.get().stream().map(this::mapearEstudianteDTO).collect(toList());
+        return estudiantesPorActividad.get().stream().map(estudianteMapper::toDTO).collect(toList());
 
     }
 
 
     @Override
     public Page<ActividadDTO> obtenerActividades(Pageable pageable) {
-        return actividadRepository.findAll(pageable).map(this::convertirAModelDTO);
+        return actividadRepository.findAll(pageable).map(actividadMapper::toDTO);
     }
 
 
@@ -194,7 +200,7 @@ public class ActividadServiceImpl implements ActividadService {
         // Eliminar NombreActividad si ya no está siendo usado
         eliminarNombreActividadNoUsado(nombreActividad);
 
-        return convertirAModelDTO(actividadActualizada);
+        return actividadMapper.toDTO(actividadActualizada);
     }
 
     private void eliminarNombreActividadNoUsado(NombreActividad nombreActividad) {
@@ -219,45 +225,5 @@ public class ActividadServiceImpl implements ActividadService {
 
     }
 
-
-    private ActividadDTO convertirAModelDTO(Actividad actividad) {
-        ActividadDTO actividadDTO = new ActividadDTO();
-        ImagenDTO imagenDTO = new ImagenDTO();
-        imagenDTO.setNombre(actividad.getImagen().getNombre());
-        imagenDTO.setImagenBase64(actividad.getImagen().getImagenBase64());
-
-        actividadDTO.setImagen(imagenDTO);
-        actividadDTO.setId(actividad.getId());
-        actividadDTO.setDescripcion(actividad.getDescripcion());
-        actividadDTO.setFecha(actividad.getFecha());
-        actividadDTO.setHoraInicio(actividad.getHoraInicio());
-        actividadDTO.setHoraFin(actividad.getHoraFin());
-        actividadDTO.setEstado(actividad.isEstado());
-        actividadDTO.setCupo(actividad.getCupo());
-
-        // Convertir relaciones a nombres
-        actividadDTO.setNombreActividad(actividad.getNombreActividad() != null ? actividad.getNombreActividad().getNombre() : null);
-        actividadDTO.setLugar(actividad.getLugar() != null ? actividad.getLugar().getNombre() : null);
-
-        // Convalidaciones
-        actividadDTO.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
-        actividadDTO.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
-
-        return actividadDTO;
-
-
-    }
-
-    private EstudianteDTO mapearEstudianteDTO(Estudiante e) {
-        EstudianteDTO dto = new EstudianteDTO();
-        dto.setCif(e.getCif());
-        dto.setCorreo(e.getCorreo());
-        dto.setNombre(e.getNombres());
-        dto.setApellido(e.getApellidos());
-        dto.setFacultad(e.getFacultad());
-        dto.setCarrera(e.getCarrera());
-        // añade aquí todos los campos que necesite el front
-        return dto;
-    }
 
 }

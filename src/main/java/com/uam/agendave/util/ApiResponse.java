@@ -1,5 +1,6 @@
 package com.uam.agendave.util;
 
+import com.uam.agendave.dto.TestDTO;
 import com.uam.agendave.model.Estudiante;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,6 @@ import java.util.Map;
 public class ApiResponse {
     private boolean success;
     private String message;
-    private List<Map<String, Object>> data; // Datos como lista de mapas
+    private List<TestDTO> data; // 👈 NOT Map<String, Object>
 }
 

@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.sql.Time;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -53,7 +52,7 @@ public class Actividad extends Identifiable {
 
     @ManyToOne
     @JoinColumn(name = "idUsuario")
-    private Administrador usuario;
+    private Usuario usuario;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = true)
     @JoinColumn(name = "imagen_id", nullable = true)
