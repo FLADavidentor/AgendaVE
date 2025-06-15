@@ -1,14 +1,13 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.Registro;
 
 import com.uam.agendave.dto.ActividadInscritaDTO;
 import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.RegistroDTO;
-import com.uam.agendave.model.Actividad;
 import com.uam.agendave.model.TipoConvalidacion;
+import com.uam.agendave.service.actividad.ActividadService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public interface RegistroService {
     public void guardarRegistro(RegistroDTO registroDTO, ActividadService actividadService);

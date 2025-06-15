@@ -2,18 +2,13 @@ package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.RegistroDTO;
-import com.uam.agendave.model.Actividad;
-import com.uam.agendave.model.Registro;
-import com.uam.agendave.model.TipoConvalidacion;
-import com.uam.agendave.service.ActividadService;  // Asegúrate de importar esta clase
-import com.uam.agendave.service.RegistroService;
+import com.uam.agendave.service.actividad.ActividadService;  // Asegúrate de importar esta clase
+import com.uam.agendave.service.Registro.RegistroService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/asistencia")

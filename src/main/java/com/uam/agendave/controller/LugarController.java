@@ -1,7 +1,7 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.LugarDTO;
-import com.uam.agendave.service.LugarService;
+import com.uam.agendave.service.lugar.LugarService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

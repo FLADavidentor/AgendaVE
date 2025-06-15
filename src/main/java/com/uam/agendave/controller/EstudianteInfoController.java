@@ -1,7 +1,7 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.model.TipoConvalidacion;
-import com.uam.agendave.service.RegistroService;
+import com.uam.agendave.service.Registro.RegistroService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

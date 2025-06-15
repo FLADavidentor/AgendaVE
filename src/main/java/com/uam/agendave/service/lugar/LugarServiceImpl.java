@@ -1,4 +1,4 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.lugar;
 
 import com.uam.agendave.dto.LugarDTO;
 import com.uam.agendave.mapper.LugarMapper;

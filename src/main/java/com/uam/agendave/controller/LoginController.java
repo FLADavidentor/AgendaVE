@@ -2,21 +2,14 @@ package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.LoginRequest;
-import com.uam.agendave.mapper.EstudianteMapper;
-import com.uam.agendave.model.Usuario;
-import com.uam.agendave.model.Estudiante;
-import com.uam.agendave.repository.UsuarioRepository;
-import com.uam.agendave.repository.EstudianteRepository;
-import com.uam.agendave.service.UsuarioService;
+import com.uam.agendave.service.usuario.UsuarioService;
 import com.uam.agendave.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/usuario")

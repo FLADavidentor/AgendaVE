@@ -3,7 +3,7 @@ package com.uam.agendave.controller;
 import com.uam.agendave.dto.NombreActividadDTO;
 import com.uam.agendave.mapper.NombreActividadMapper;
 import com.uam.agendave.model.NombreActividad;
-import com.uam.agendave.service.NombreActividadService;
+import com.uam.agendave.service.nombreActividad.NombreActividadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

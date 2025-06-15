@@ -2,8 +2,8 @@ package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.dto.EstudianteDTO;
-import com.uam.agendave.service.ActividadService;
-import com.uam.agendave.service.ActivityCleanupService;
+import com.uam.agendave.service.actividad.ActividadService;
+import com.uam.agendave.service.actividad.ActivityCleanupService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 

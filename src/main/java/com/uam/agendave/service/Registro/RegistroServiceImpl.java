@@ -1,14 +1,16 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.Registro;
 
 import com.uam.agendave.dto.ActividadInscritaDTO;
 import com.uam.agendave.dto.AsistenciaDTO;
 import com.uam.agendave.dto.MeetingDetailsDTO;
 import com.uam.agendave.dto.RegistroDTO;
+import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.EstudianteRepository;
 import com.uam.agendave.repository.RegistroRepository;
+import com.uam.agendave.service.email.EmailService;
+import com.uam.agendave.service.actividad.ActividadService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.Version;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +43,7 @@ public class RegistroServiceImpl implements RegistroService {
         long inscritos = repository.countByActividadId(registroDTO.getIdActividad());
 
         if (inscritos >= actividad.getCupo()) {
-            throw new IllegalStateException("Cupo agotado para la actividad " + actividad.getNombreActividad());
+            throw new CupoFullException("Cupo agotado para la actividad " + actividad.getNombreActividad());
         }
 
         Map<TipoConvalidacion, Integer> variable = actividad.getConvalidacionesPermitidas();

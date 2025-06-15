@@ -1,4 +1,4 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.actividad;
 
 import com.uam.agendave.model.Actividad;
 import com.uam.agendave.repository.ActividadRepository;

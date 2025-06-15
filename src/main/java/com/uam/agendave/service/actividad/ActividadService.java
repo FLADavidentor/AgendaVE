@@ -1,15 +1,12 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.actividad;
 
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.model.Actividad;
-import com.uam.agendave.model.TipoConvalidacion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface ActividadService {

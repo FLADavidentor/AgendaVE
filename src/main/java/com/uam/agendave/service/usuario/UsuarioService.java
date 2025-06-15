@@ -1,4 +1,4 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.usuario;
 
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.LoginRequest;

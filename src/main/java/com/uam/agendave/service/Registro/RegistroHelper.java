@@ -1,4 +1,4 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.Registro;
 
 import com.uam.agendave.model.Estudiante;
 import com.uam.agendave.repository.EstudianteRepository;

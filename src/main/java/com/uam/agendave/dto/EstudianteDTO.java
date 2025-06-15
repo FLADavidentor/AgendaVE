@@ -1,6 +1,8 @@
 package com.uam.agendave.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,11 +11,17 @@ import java.util.UUID;
 @Setter
 public class EstudianteDTO {
 
+    @NotBlank(message = "El CIF es obligatorio")
     private String cif;
+    @Email(message = "El correo debe ser valido")
     private String correo;
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
+    @NotBlank(message = "El apellido es obligatorio")
     private String apellido;
+    @NotBlank(message = "La facultad es obligatoria")
     private String facultad;
+    @NotBlank(message = "La carrera es obligatoria")
     private String carrera;
 
 

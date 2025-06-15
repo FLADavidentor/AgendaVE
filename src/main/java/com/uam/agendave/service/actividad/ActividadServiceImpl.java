@@ -1,13 +1,16 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.actividad;
 
 import com.uam.agendave.dto.ActividadDTO;
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.ImagenDTO;
+import com.uam.agendave.exception.NotFoundException;
 import com.uam.agendave.mapper.EstudianteMapper;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
+import com.uam.agendave.service.nombreActividad.NombreActividadService;
+import com.uam.agendave.service.nombreActividad.NombreActividadServiceImpl;
 import jakarta.transaction.Transactional;
-import org.springframework.boot.autoconfigure.batch.BatchTransactionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import com.uam.agendave.mapper.ActividadMapper;
@@ -31,8 +33,10 @@ public class ActividadServiceImpl implements ActividadService {
     private final EstudianteRepository estudianteRepository;
     private final ActividadMapper actividadMapper;
     private final EstudianteMapper estudianteMapper;
+    private final ActividadNotifService actividadNotifService;
 
-    public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository) {
+    @Autowired
+    public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository,ActividadNotifService actividadNotifService) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
@@ -41,6 +45,7 @@ public class ActividadServiceImpl implements ActividadService {
         this.estudianteRepository = estudianteRepository;
         this.actividadMapper = new ActividadMapper();
         this.estudianteMapper = new EstudianteMapper();
+        this.actividadNotifService = actividadNotifService;
     }
 
     @Override
@@ -89,7 +94,7 @@ public class ActividadServiceImpl implements ActividadService {
             });
             System.out.println(nombreActividad.getId());
 
-            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
             System.out.println(lugar.getId());
 
             Actividad actividad = getActividad(actividadDTO, nombreActividad, lugar);
@@ -137,7 +142,7 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public int getCupoRestante(UUID actividadID) {
-        Actividad act = actividadRepository.findById(actividadID).orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + actividadID));
+        Actividad act = actividadRepository.findById(actividadID).orElseThrow(() -> new NotFoundException("Actividad no encontrada con ID: " + actividadID));
         long inscritos = registroRepository.countByActividadId(actividadID);
         return act.getCupo() - (int) inscritos;
     }
@@ -166,13 +171,13 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public Actividad buscarPorId(UUID id) {
-        return actividadRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con ID: " + id));
+        return actividadRepository.findById(id).orElseThrow(() -> new NotFoundException("Actividad no encontrada con ID: " + id));
     }
 
     @Override
     @Transactional
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
-        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new IllegalArgumentException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
+        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new NotFoundException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
         // Actualizar los campos simples
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
@@ -191,12 +196,18 @@ public class ActividadServiceImpl implements ActividadService {
 
         actividadExistente.setNombreActividad(nombreActividad);
 
-        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + actividadDTO.getLugar()));
+        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
         actividadExistente.setLugar(lugar);
 
         // Guardar los cambios
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
+        //WEBSOCKET
+        if (actividadDTO.isEstado()) {
+            actividadNotifService.notificarActividadPublicada(actividadMapper.toDTO(actividadActualizada));
+        } else {
+            actividadNotifService.notificarActividadDesPublicada(actividadMapper.toDTO(actividadActualizada));
+        }
         // Eliminar NombreActividad si ya no está siendo usado
         eliminarNombreActividadNoUsado(nombreActividad);
 
@@ -218,7 +229,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
         if (!actividadRepository.existsById(id)) {
-            throw new IllegalArgumentException("Actividad no encontrada con ID: " + id);
+            throw new NotFoundException("Actividad no encontrada con ID: " + id);
         }
         registroRepository.deleteByActividadId(id);
         actividadRepository.deleteById(id);

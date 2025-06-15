@@ -1,9 +1,8 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.nombreActividad;
 
 import com.uam.agendave.model.NombreActividad;
 
 import java.util.List;
-import java.util.UUID;
 
 
 public interface NombreActividadService {

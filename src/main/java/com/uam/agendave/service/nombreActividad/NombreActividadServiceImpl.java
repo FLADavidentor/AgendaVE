@@ -1,11 +1,10 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.nombreActividad;
 
 import com.uam.agendave.model.NombreActividad;
 import com.uam.agendave.repository.NombreActividadRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class NombreActividadServiceImpl implements NombreActividadService {

@@ -1,4 +1,4 @@
-package com.uam.agendave.service;
+package com.uam.agendave.service.usuario;
 
 import com.uam.agendave.dto.EstudianteDTO;
 import com.uam.agendave.dto.LoginRequest;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
