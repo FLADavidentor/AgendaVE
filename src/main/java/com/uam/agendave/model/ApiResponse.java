@@ -1,6 +1,6 @@
 package com.uam.agendave.model;
 
-import com.uam.agendave.dto.TestDTO;
+import com.uam.agendave.dto.Usuario.TestDTO;
 import lombok.Getter;
 import lombok.Setter;
 

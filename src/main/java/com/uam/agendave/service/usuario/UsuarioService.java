@@ -1,8 +1,8 @@
 package com.uam.agendave.service.usuario;
 
-import com.uam.agendave.dto.EstudianteDTO;
-import com.uam.agendave.dto.LoginRequest;
-import com.uam.agendave.dto.TestDTO;
+import com.uam.agendave.dto.Usuario.EstudianteDTO;
+import com.uam.agendave.dto.Usuario.LoginRequest;
+import com.uam.agendave.dto.Usuario.TestDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface UsuarioService {

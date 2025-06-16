@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Actividad;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,4 +12,6 @@ public class LugarDTO {
     private UUID id;
     private String nombre;
     private int capacidad;
+    private Double latitud;
+    private Double longitud;
 }

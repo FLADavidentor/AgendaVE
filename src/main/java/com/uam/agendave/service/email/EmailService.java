@@ -1,6 +1,6 @@
 package com.uam.agendave.service.email;
 
-import com.uam.agendave.dto.MeetingDetailsDTO;
+import com.uam.agendave.dto.Notificaciones.MeetingDetailsDTO;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

@@ -1,18 +1,16 @@
 package com.uam.agendave.util;
 
-import com.uam.agendave.dto.TestDTO;
-import com.uam.agendave.model.Estudiante;
+import com.uam.agendave.dto.Usuario.TestDTO;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
 public class ApiResponse {
     private boolean success;
     private String message;
-    private List<TestDTO> data; // 👈 NOT Map<String, Object>
+    private List<TestDTO> data;
 }
 

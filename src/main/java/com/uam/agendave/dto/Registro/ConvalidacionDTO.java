@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Registro;
 
 import lombok.Getter;
 import lombok.Setter;

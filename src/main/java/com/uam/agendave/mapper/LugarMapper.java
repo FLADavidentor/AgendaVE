@@ -1,6 +1,6 @@
 package com.uam.agendave.mapper;
 
-import com.uam.agendave.dto.LugarDTO;
+import com.uam.agendave.dto.Actividad.LugarDTO;
 import com.uam.agendave.model.Lugar;
 
 public class LugarMapper {
@@ -10,6 +10,8 @@ public class LugarMapper {
         dto.setId(lugar.getId());
         dto.setNombre(lugar.getNombre());
         dto.setCapacidad(lugar.getCapacidad());
+        dto.setLatitud(lugar.getLatitud());
+        dto.setLongitud(lugar.getLongitud());
         return dto;
     }
 
@@ -18,6 +20,8 @@ public class LugarMapper {
         lugar.setId(dto.getId());
         lugar.setNombre(dto.getNombre());
         lugar.setCapacidad(dto.getCapacidad());
+        lugar.setLatitud(dto.getLatitud());
+        lugar.setLongitud(dto.getLongitud());
         return lugar;
     }
 }

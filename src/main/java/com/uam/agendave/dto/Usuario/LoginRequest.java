@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Usuario;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -6,9 +6,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequestUser {
-    @NotBlank(message = "El usuario es obligatorio")
-    private String username;
+public class LoginRequest {
+    @NotBlank(message = "El CIF es obligatorio")
+    private String cif;
     @NotBlank(message = "La contrasena es obligatoria")
     private String password;
 }
+

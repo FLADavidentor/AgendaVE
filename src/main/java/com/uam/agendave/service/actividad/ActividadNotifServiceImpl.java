@@ -1,6 +1,6 @@
 package com.uam.agendave.service.actividad;
 
-import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.Actividad.ActividadDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

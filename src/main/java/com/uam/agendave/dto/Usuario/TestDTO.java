@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Usuario;
 
 
 import lombok.Getter;

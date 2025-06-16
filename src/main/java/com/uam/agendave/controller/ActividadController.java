@@ -1,9 +1,16 @@
 package com.uam.agendave.controller;
 
-import com.uam.agendave.dto.ActividadDTO;
-import com.uam.agendave.dto.EstudianteDTO;
+import com.uam.agendave.dto.Actividad.ActividadDTO;
+import com.uam.agendave.dto.Actividad.LugarDTO;
+import com.uam.agendave.dto.Actividad.ResumenActividadDTO;
+import com.uam.agendave.dto.EntidadesConfig.ZonaAsistenciaDTO;
+import com.uam.agendave.dto.Usuario.EstudianteDTO;
+import com.uam.agendave.entities.ConfigAsistenciaTemporal;
+import com.uam.agendave.mapper.ActividadMapper;
 import com.uam.agendave.service.actividad.ActividadService;
 import com.uam.agendave.service.actividad.ActivityCleanupService;
+import com.uam.agendave.service.entities.zona.AsistenciaConfigStoreService;
+import com.uam.agendave.service.lugar.LugarService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +30,19 @@ import java.util.UUID;
 public class ActividadController {
     private final ActividadService actividadService;
     private final ActivityCleanupService activityCleanupService;
+    private final LugarService lugarService;
+    private final AsistenciaConfigStoreService asistenciaConfigStoreService;
+    private final ActividadMapper actividadMapper = new ActividadMapper();
 
-    public ActividadController(ActividadService actividadService, ActivityCleanupService activityCleanupService) {
+
+    public ActividadController(ActividadService actividadService,
+                               ActivityCleanupService activityCleanupService,
+                               LugarService lugarService,
+                               AsistenciaConfigStoreService asistenciaConfigStoreService) {
         this.actividadService = actividadService;
         this.activityCleanupService = activityCleanupService;
+        this.lugarService = lugarService;
+        this.asistenciaConfigStoreService = asistenciaConfigStoreService;
     }
     @PreAuthorize("hasRole('ADMIN')")
     
@@ -137,6 +153,22 @@ public class ActividadController {
         actividadService.eliminarActividad(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
+    @GetMapping("/resumen/{idActividad}")
+    public ResumenActividadDTO getResumenActividad(@PathVariable UUID idActividad) {
+        ActividadDTO actividad = actividadMapper.toDTO(actividadService.buscarPorId(idActividad));
+        LugarDTO lugar = lugarService.buscarPorActividad(idActividad);
+        ZonaAsistenciaDTO zona = null;
+
+        if (asistenciaConfigStoreService.existeConfiguracion(idActividad)) {
+            ConfigAsistenciaTemporal config = asistenciaConfigStoreService.obtenerConfiguracion(idActividad);
+            zona = new ZonaAsistenciaDTO(idActividad, lugar.getLatitud(), lugar.getLongitud(), config.getRadioMetros(), config.getTiempoLimite());
+        }
+
+        return new ResumenActividadDTO(actividad, lugar, zona);
+    }
+
 
 
 }

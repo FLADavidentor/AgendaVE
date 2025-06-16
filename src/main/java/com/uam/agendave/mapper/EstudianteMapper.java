@@ -1,7 +1,7 @@
 package com.uam.agendave.mapper;
 
-import com.uam.agendave.dto.EstudianteDTO;
-import com.uam.agendave.dto.TestDTO;
+import com.uam.agendave.dto.Usuario.EstudianteDTO;
+import com.uam.agendave.dto.Usuario.TestDTO;
 import com.uam.agendave.model.Estudiante;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;

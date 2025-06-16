@@ -1,7 +1,7 @@
 package com.uam.agendave.mapper;
 
-import com.uam.agendave.dto.ActividadDTO;
-import com.uam.agendave.dto.ImagenDTO;
+import com.uam.agendave.dto.Actividad.ActividadDTO;
+import com.uam.agendave.dto.Actividad.ImagenDTO;
 import com.uam.agendave.model.Actividad;
 import com.uam.agendave.model.ImageData;
 import com.uam.agendave.model.Lugar;

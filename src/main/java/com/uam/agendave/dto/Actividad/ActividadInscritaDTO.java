@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Actividad;
 
 import com.uam.agendave.model.Actividad;
 import lombok.Getter;

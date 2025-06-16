@@ -2,8 +2,11 @@ package com.uam.agendave.repository;
 
 import com.uam.agendave.model.Lugar;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface LugarRepository extends JpaRepository<Lugar, UUID> {
@@ -13,4 +16,7 @@ public interface LugarRepository extends JpaRepository<Lugar, UUID> {
 
     // Busca actividades que empiecen con el texto dado
     List<Lugar> findByNombreStartingWith(String nombre);
+    @Query("SELECT a.lugar FROM Actividad a WHERE a.id = :idActividad")
+    Optional<Lugar> findLugarByActividadId(@Param("idActividad") UUID idActividad);
+
 }

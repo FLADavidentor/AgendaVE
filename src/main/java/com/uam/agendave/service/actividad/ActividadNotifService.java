@@ -1,6 +1,6 @@
 package com.uam.agendave.service.actividad;
 
-import com.uam.agendave.dto.ActividadDTO;
+import com.uam.agendave.dto.Actividad.ActividadDTO;
 
 public interface ActividadNotifService {
 

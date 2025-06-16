@@ -1,7 +1,7 @@
 package com.uam.agendave.controller;
 
-import com.uam.agendave.dto.EstudianteDTO;
-import com.uam.agendave.dto.LoginRequest;
+import com.uam.agendave.dto.Usuario.EstudianteDTO;
+import com.uam.agendave.dto.Usuario.LoginRequest;
 import com.uam.agendave.service.usuario.UsuarioService;
 import com.uam.agendave.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Registro;
 
 import com.uam.agendave.model.EstadoAsistencia;
 import lombok.Getter;

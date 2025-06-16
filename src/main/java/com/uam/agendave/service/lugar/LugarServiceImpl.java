@@ -1,6 +1,6 @@
 package com.uam.agendave.service.lugar;
 
-import com.uam.agendave.dto.LugarDTO;
+import com.uam.agendave.dto.Actividad.LugarDTO;
 import com.uam.agendave.mapper.LugarMapper;
 import com.uam.agendave.model.Lugar;
 import com.uam.agendave.repository.LugarRepository;
@@ -72,6 +72,12 @@ public class LugarServiceImpl implements LugarService {
         return lugarRepository.findByNombreStartingWith(nombre).stream()
                 .map(lugarMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+    @Override
+    public LugarDTO buscarPorActividad(UUID idActividad) {
+        Lugar lugar = lugarRepository.findLugarByActividadId(idActividad)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el lugar para la actividad con ID: " + idActividad));
+        return lugarMapper.toDTO(lugar);
     }
 
 }

@@ -1,9 +1,9 @@
 package com.uam.agendave.service.Registro;
 
-import com.uam.agendave.dto.ActividadInscritaDTO;
-import com.uam.agendave.dto.AsistenciaDTO;
-import com.uam.agendave.dto.MeetingDetailsDTO;
-import com.uam.agendave.dto.RegistroDTO;
+import com.uam.agendave.dto.Actividad.ActividadInscritaDTO;
+import com.uam.agendave.dto.Registro.AsistenciaDTO;
+import com.uam.agendave.dto.Notificaciones.MeetingDetailsDTO;
+import com.uam.agendave.dto.Registro.RegistroDTO;
 import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.EstudianteRepository;
@@ -12,6 +12,7 @@ import com.uam.agendave.service.email.EmailService;
 import com.uam.agendave.service.actividad.ActividadService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,12 +25,20 @@ public class RegistroServiceImpl implements RegistroService {
     private final RegistroRepository repository;
     private final EstudianteRepository estudianteRepository;
     private final EmailService emailService;
+    private final RegistroNotifService registroNotifService;
+    private final AsistenciaNotifService asistenciaNotifService;
 
-
-    public RegistroServiceImpl(RegistroRepository repository, EstudianteRepository estudianteRepository, EmailService emailService) {
+@Autowired
+    public RegistroServiceImpl(RegistroRepository repository,
+                               EstudianteRepository estudianteRepository,
+                               EmailService emailService,
+                               RegistroNotifService registroNotifService,
+                               AsistenciaNotifService asistenciaNotifService) {
         this.repository = repository;
         this.estudianteRepository = estudianteRepository;
         this.emailService = emailService;
+        this.registroNotifService = registroNotifService;
+        this.asistenciaNotifService = asistenciaNotifService;
 
     }
 
@@ -60,6 +69,7 @@ public class RegistroServiceImpl implements RegistroService {
 
         repository.save(registro);
 
+
         Optional<Estudiante> estudiante = estudianteRepository.findByCif(registroDTO.getCif());
         String subject = "Confirmación de inscripción a la actividad";
         String body = String.format("Hola %s, te has inscrito correctamente en la actividad:%n%s a las %s.",
@@ -81,7 +91,8 @@ public class RegistroServiceImpl implements RegistroService {
 
 
         emailService.sendMeetingInvitation(estudiante.get().getCorreo(), subject, meeting );
-    }
+        registroNotifService.notificarRegistroCreado(registroDTO);
+}
 
 
     @Transactional()
@@ -114,6 +125,8 @@ public class RegistroServiceImpl implements RegistroService {
 
         // Actualizar timestamp
         registro.setAsistenciaTimestamp(LocalDateTime.now());
+
+        asistenciaNotifService.notifAsistenciaEstado(asistenciaDTO);
     }
 
 
@@ -125,7 +138,7 @@ public class RegistroServiceImpl implements RegistroService {
                 .map(registro -> {
                     ActividadInscritaDTO dto = new ActividadInscritaDTO();
                     dto.setActividad(registro.getActividad());
-                    dto.setTipoConvalidacion(registro.getTipoConvalidacion().name()); // suponiendo que TipoConvalidacion es Enum
+                    dto.setTipoConvalidacion(registro.getTipoConvalidacion().name());
                     return dto;
                 })
                 .collect(Collectors.toList());

@@ -1,7 +1,7 @@
 package com.uam.agendave.controller;
 
-import com.uam.agendave.dto.AsistenciaDTO;
-import com.uam.agendave.dto.RegistroDTO;
+import com.uam.agendave.dto.Registro.AsistenciaDTO;
+import com.uam.agendave.dto.Registro.RegistroDTO;
 import com.uam.agendave.service.actividad.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.Registro.RegistroService;
 import org.springframework.http.ResponseEntity;

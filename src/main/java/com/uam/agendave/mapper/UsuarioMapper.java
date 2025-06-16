@@ -1,6 +1,6 @@
 package com.uam.agendave.mapper;
 
-import com.uam.agendave.dto.AdministradorDTO;
+import com.uam.agendave.dto.Usuario.AdministradorDTO;
 import com.uam.agendave.model.Usuario;
 import org.springframework.stereotype.Component;
 

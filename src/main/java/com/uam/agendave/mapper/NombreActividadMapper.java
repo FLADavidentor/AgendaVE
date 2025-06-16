@@ -1,6 +1,6 @@
 package com.uam.agendave.mapper;
 
-import com.uam.agendave.dto.NombreActividadDTO;
+import com.uam.agendave.dto.Actividad.NombreActividadDTO;
 import com.uam.agendave.model.NombreActividad;
 import org.springframework.stereotype.Component;
 

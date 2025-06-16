@@ -1,4 +1,4 @@
-package com.uam.agendave.dto;
+package com.uam.agendave.dto.Usuario;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

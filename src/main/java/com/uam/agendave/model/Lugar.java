@@ -14,6 +14,8 @@ public class Lugar extends Identifiable {
 
     private String nombre;
     private int capacidad;
+    private Double latitud;
+    private Double longitud;
 
     @OneToMany(mappedBy = "lugar")
     @JsonBackReference

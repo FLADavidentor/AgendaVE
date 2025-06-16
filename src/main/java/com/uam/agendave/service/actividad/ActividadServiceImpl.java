@@ -1,8 +1,8 @@
 package com.uam.agendave.service.actividad;
 
-import com.uam.agendave.dto.ActividadDTO;
-import com.uam.agendave.dto.EstudianteDTO;
-import com.uam.agendave.dto.ImagenDTO;
+import com.uam.agendave.dto.Actividad.ActividadDTO;
+import com.uam.agendave.dto.Usuario.EstudianteDTO;
+import com.uam.agendave.dto.Actividad.ImagenDTO;
 import com.uam.agendave.exception.NotFoundException;
 import com.uam.agendave.mapper.EstudianteMapper;
 import com.uam.agendave.model.*;

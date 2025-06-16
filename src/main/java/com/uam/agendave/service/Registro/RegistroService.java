@@ -1,8 +1,8 @@
 package com.uam.agendave.service.Registro;
 
-import com.uam.agendave.dto.ActividadInscritaDTO;
-import com.uam.agendave.dto.AsistenciaDTO;
-import com.uam.agendave.dto.RegistroDTO;
+import com.uam.agendave.dto.Actividad.ActividadInscritaDTO;
+import com.uam.agendave.dto.Registro.AsistenciaDTO;
+import com.uam.agendave.dto.Registro.RegistroDTO;
 import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.actividad.ActividadService;
 
