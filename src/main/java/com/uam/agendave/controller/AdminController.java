@@ -22,7 +22,7 @@ public class AdminController {
     
     @PostMapping("/crear")
     public ResponseEntity<String> crearAdmin() {
-        var correo = "vadoalexander@gmail.com";
+        var correo = "admin@uam.edu.ni";
 
         if (usuarioRepository.findByCorreo(correo).isPresent()) {
             return ResponseEntity.badRequest().body("ya existe, next");
