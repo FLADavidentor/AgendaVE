@@ -163,7 +163,7 @@ public class ActividadController {
 
         if (asistenciaConfigStoreService.existeConfiguracion(idActividad)) {
             ConfigAsistenciaTemporal config = asistenciaConfigStoreService.obtenerConfiguracion(idActividad);
-            zona = new ZonaAsistenciaDTO(idActividad, lugar.getLatitud(), lugar.getLongitud(), config.getRadioMetros(), config.getTiempoLimite());
+            zona = new ZonaAsistenciaDTO(idActividad, lugar.getLatitud(), config.getTiempoLimite());
         }
 
         return new ResumenActividadDTO(actividad, lugar, zona);

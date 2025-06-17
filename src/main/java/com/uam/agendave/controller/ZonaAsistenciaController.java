@@ -39,8 +39,6 @@ public class ZonaAsistenciaController {
         var config = asistenciaConfigStoreService.obtenerConfiguracion(idActividad);
         return new ZonaAsistenciaDTO(
                 idActividad,
-                null, // latitud
-                null, // longitud
                 config.getRadioMetros(),
                 config.getTiempoLimite()
         );

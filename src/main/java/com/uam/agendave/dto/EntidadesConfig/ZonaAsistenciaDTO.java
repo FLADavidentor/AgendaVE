@@ -26,10 +26,8 @@ public class ZonaAsistenciaDTO {
     @Future(message = "El tiempo límite debe ser una fecha futura.")
     private LocalDateTime tiempoLimite;
 
-    public ZonaAsistenciaDTO(UUID idActividad,Double lat, Double lng, Double radioMetros, LocalDateTime tiempoLimite) {
+    public ZonaAsistenciaDTO(UUID idActividad, Double radioMetros, LocalDateTime tiempoLimite) {
         this.idActividad = idActividad;
-        this.lat = lat;
-        this.lng = lng;
         this.radioMetros = radioMetros;
         this.tiempoLimite = tiempoLimite;
     }
