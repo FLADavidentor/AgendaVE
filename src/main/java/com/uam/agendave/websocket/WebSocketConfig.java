@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry
                 .addEndpoint("/ws-pure")
                 .setAllowedOrigins("https://registifyfront.fladadrome.xyz", "https://registify.fladadrome.xyz")
-                .withSockJS();
+
 
         // SockJS (para fallback) → endpoint bajo /api/ws
         registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
