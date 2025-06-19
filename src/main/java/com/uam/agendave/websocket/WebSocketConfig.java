@@ -19,7 +19,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // WebSocket puro (para brokerURL) → endpoint separado
         registry
                 .addEndpoint("/ws-pure")
-                .setAllowedOrigins("https://registifyfront.fladadrome.xyz", "https://registify.fladadrome.xyz")
+                .setAllowedOrigins("https://registifyfront.fladadrome.xyz", "https://registify.fladadrome.xyz");
 
 
         // SockJS (para fallback) → endpoint bajo /api/ws
