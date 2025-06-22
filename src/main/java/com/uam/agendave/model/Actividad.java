@@ -33,6 +33,9 @@ public class Actividad extends Identifiable {
     private boolean estado;
     private int cupo;
 
+    @ManyToOne
+    @JoinColumn(name = "idTransporte")
+    private Transporte transporte;
     @ElementCollection
     @CollectionTable(name = "actividad_convalidaciones", joinColumns = @JoinColumn(name = "idActividad"))
     @MapKeyColumn(name = "tipoConvalidacion") // Enum como clave

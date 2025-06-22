@@ -1,12 +1,14 @@
 package com.uam.agendave.service.actividad;
 
 import com.uam.agendave.dto.Actividad.ActividadDTO;
+import com.uam.agendave.dto.Actividad.TransporteDTO;
 import com.uam.agendave.dto.Usuario.EstudianteDTO;
 import com.uam.agendave.dto.Actividad.ImagenDTO;
 import com.uam.agendave.exception.NotFoundException;
 import com.uam.agendave.mapper.EstudianteMapper;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
+import com.uam.agendave.service.Transporte.TransporteService;
 import com.uam.agendave.service.nombreActividad.NombreActividadService;
 import com.uam.agendave.service.nombreActividad.NombreActividadServiceImpl;
 import jakarta.transaction.Transactional;
@@ -34,9 +36,10 @@ public class ActividadServiceImpl implements ActividadService {
     private final ActividadMapper actividadMapper;
     private final EstudianteMapper estudianteMapper;
     private final ActividadNotifService actividadNotifService;
+    private final TransporteService transporteService;
 
     @Autowired
-    public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository,ActividadNotifService actividadNotifService) {
+    public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository,ActividadNotifService actividadNotifService,TransporteService transporteService) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
@@ -46,6 +49,7 @@ public class ActividadServiceImpl implements ActividadService {
         this.actividadMapper = new ActividadMapper();
         this.estudianteMapper = new EstudianteMapper();
         this.actividadNotifService = actividadNotifService;
+        this.transporteService = transporteService;
     }
 
     @Override
@@ -84,28 +88,36 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public void guardarActividad(ActividadDTO actividadDTO) throws Exception {
-
         try {
             // Buscar o crear NombreActividad
-            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad()).stream().findFirst().orElseGet(() -> {
-                NombreActividad nuevaNombreActividad = new NombreActividad();
-                nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
-                return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
-            });
-            System.out.println(nombreActividad.getId());
+            NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                    .stream()
+                    .findFirst()
+                    .orElseGet(() -> {
+                        NombreActividad nueva = new NombreActividad();
+                        nueva.setNombre(actividadDTO.getNombreActividad());
+                        return nombreActividadService.guardar(nueva);
+                    });
 
-            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
-            System.out.println(lugar.getId());
+            Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
 
             Actividad actividad = getActividad(actividadDTO, nombreActividad, lugar);
+
+            // Asociar transporte si se proporcionó un ID
+            if (actividadDTO.getIdTransporte() != null) {
+                Transporte transporte = transporteService.buscarEntidadPorId(actividadDTO.getIdTransporte()); // ya existe
+                actividad.setTransporte(transporte);
+            }
 
             actividadRepository.save(actividad);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
+
 
     private static Actividad getActividad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar) {
         Actividad actividad = new Actividad();
@@ -177,9 +189,10 @@ public class ActividadServiceImpl implements ActividadService {
     @Override
     @Transactional
     public ActividadDTO actualizarActividad(ActividadDTO actividadDTO) {
-        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId()).orElseThrow(() -> new NotFoundException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
+        Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
+                .orElseThrow(() -> new NotFoundException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
-        // Actualizar los campos simples
+        // Actualizar campos simples
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
         actividadExistente.setFecha(actividadDTO.getFecha());
         actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
@@ -188,31 +201,47 @@ public class ActividadServiceImpl implements ActividadService {
         actividadExistente.setCupo(actividadDTO.getCupo());
 
         // Buscar o crear NombreActividad
-        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad()).stream().findFirst().orElseGet(() -> {
-            NombreActividad nuevaNombreActividad = new NombreActividad();
-            nuevaNombreActividad.setNombre(actividadDTO.getNombreActividad());
-            return nombreActividadService.guardar(nuevaNombreActividad); // Usar el servicio para persistir
-        });
-
+        NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
+                .stream()
+                .findFirst()
+                .orElseGet(() -> {
+                    NombreActividad nueva = new NombreActividad();
+                    nueva.setNombre(actividadDTO.getNombreActividad());
+                    return nombreActividadService.guardar(nueva);
+                });
         actividadExistente.setNombreActividad(nombreActividad);
 
-        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar()).stream().findFirst().orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
+        // Buscar Lugar
+        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
         actividadExistente.setLugar(lugar);
 
-        // Guardar los cambios
+        // Asociar transporte si se especificó
+        if (actividadDTO.getIdTransporte() != null) {
+            Transporte transporte = transporteService.buscarEntidadPorId(actividadDTO.getIdTransporte());
+            actividadExistente.setTransporte(transporte);
+        } else {
+            actividadExistente.setTransporte(null); // Omitir esta línea si no se desea borrar transporte al editar
+        }
+
+        // Guardar cambios
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
-        //WEBSOCKET
+        // Notificación WebSocket
         if (actividadDTO.isEstado()) {
             actividadNotifService.notificarActividadPublicada(actividadMapper.toDTO(actividadActualizada));
         } else {
             actividadNotifService.notificarActividadDesPublicada(actividadMapper.toDTO(actividadActualizada));
         }
-        // Eliminar NombreActividad si ya no está siendo usado
+
+        // Limpiar NombreActividad si no se usa
         eliminarNombreActividadNoUsado(nombreActividad);
 
         return actividadMapper.toDTO(actividadActualizada);
     }
+
 
     private void eliminarNombreActividadNoUsado(NombreActividad nombreActividad) {
         // Verificar si el NombreActividad está siendo usado por otras actividades

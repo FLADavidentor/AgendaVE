@@ -6,6 +6,7 @@ import com.uam.agendave.model.Actividad;
 import com.uam.agendave.model.ImageData;
 import com.uam.agendave.model.Lugar;
 import com.uam.agendave.model.NombreActividad;
+import com.uam.agendave.model.Transporte;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,6 +37,10 @@ public class ActividadMapper {
         dto.setConvalidacionesPermitidas(actividad.getConvalidacionesPermitidas());
         dto.setTotalConvalidacionesPermitidas(actividad.getTotalConvalidacionesPermitidas());
 
+        if (actividad.getTransporte() != null) {
+            dto.setIdTransporte(actividad.getTransporte().getId());
+        }
+
         return dto;
     }
 
@@ -63,6 +68,12 @@ public class ActividadMapper {
         actividad.setConvalidacionesPermitidas(dto.getConvalidacionesPermitidas());
         actividad.setTotalConvalidacionesPermitidas(dto.getTotalConvalidacionesPermitidas());
 
+        return actividad;
+    }
+
+    public Actividad toEntity(ActividadDTO dto, NombreActividad nombreActividad, Lugar lugar, Transporte transporte) {
+        Actividad actividad = toEntity(dto, nombreActividad, lugar);
+        actividad.setTransporte(transporte);
         return actividad;
     }
 }
