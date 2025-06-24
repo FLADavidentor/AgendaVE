@@ -16,7 +16,7 @@ public class MeetingDetailsDTO {
     private String materials; //ya
     private String lead; //ya
     private String noteTaker; //ya
-    private String timekeeper; //ya
+    private String timekeeper; //yas
     private String confirmationDeadline; //ya
     private String senderName;
 

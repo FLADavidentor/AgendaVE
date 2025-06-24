@@ -19,4 +19,5 @@ public interface LugarRepository extends JpaRepository<Lugar, UUID> {
     @Query("SELECT a.lugar FROM Actividad a WHERE a.id = :idActividad")
     Optional<Lugar> findLugarByActividadId(@Param("idActividad") UUID idActividad);
 
+    List<Lugar> findByNombre(String nombre);
 }
