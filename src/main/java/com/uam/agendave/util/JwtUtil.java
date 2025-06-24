@@ -11,10 +11,10 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    // 🔐 Clave secreta HS256 de 33 caracteres
+    // Clave secreta HS256 de 33 caracteres
     private final String SECRET_KEY = "g0dPlzN0JwtBrut3F0rceMyT0kenSLOL";
 
-    // ✅ Genera el token con subject y rol
+    // Genera el token con subject y rol
     public String generateToken(String username, String rol) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("rol", rol);

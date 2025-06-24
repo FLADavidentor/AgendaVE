@@ -199,6 +199,9 @@ public class ActividadServiceImpl implements ActividadService {
         actividadExistente.setHoraFin(actividadDTO.getHoraFin());
         actividadExistente.setEstado(actividadDTO.isEstado());
         actividadExistente.setCupo(actividadDTO.getCupo());
+        actividadExistente.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
+        actividadExistente.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
+
 
         // Buscar o crear NombreActividad
         NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
