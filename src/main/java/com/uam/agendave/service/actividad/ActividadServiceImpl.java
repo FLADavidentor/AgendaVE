@@ -212,7 +212,7 @@ public class ActividadServiceImpl implements ActividadService {
         actividadExistente.setNombreActividad(nombreActividad);
 
         // Buscar Lugar
-        Lugar lugar = lugarRepository.findByNombreContainingIgnoreCase(actividadDTO.getLugar())
+        Lugar lugar = lugarRepository.findByNombre(actividadDTO.getLugar())
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
