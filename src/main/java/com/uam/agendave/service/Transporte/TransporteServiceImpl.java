@@ -21,7 +21,7 @@ public class TransporteServiceImpl implements TransporteService {
     private final TransporteMapper transporteMapper;
 
     private Lugar obtenerLugarExistente(String nombreLugar) {
-        return lugarRepository.findByNombreContainingIgnoreCase(nombreLugar)
+        return lugarRepository.findByNombre(nombreLugar)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Lugar no encontrado: " + nombreLugar));
@@ -81,7 +81,7 @@ public class TransporteServiceImpl implements TransporteService {
 
     @Override
     public List<TransporteDTO> buscarPorLugar(String nombreLugar) {
-        return transporteRepository.findByLugarNombreContainingIgnoreCase(nombreLugar).stream()
+        return transporteRepository.findByLugarNombre(nombreLugar).stream()
                 .map(transporteMapper::toDTO)
                 .collect(Collectors.toList());
     }
