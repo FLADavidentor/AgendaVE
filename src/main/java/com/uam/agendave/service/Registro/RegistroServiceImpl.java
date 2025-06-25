@@ -3,6 +3,8 @@ package com.uam.agendave.service.Registro;
 import com.uam.agendave.dto.Actividad.ActividadInscritaDTO;
 import com.uam.agendave.dto.Registro.AsistenciaDTO;
 import com.uam.agendave.dto.Notificaciones.MeetingDetailsDTO;
+import com.uam.agendave.dto.Registro.InscritoBodyDTO;
+import com.uam.agendave.dto.Registro.InscritoResponseDTO;
 import com.uam.agendave.dto.Registro.RegistroDTO;
 import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.model.*;
@@ -60,7 +62,7 @@ public class RegistroServiceImpl implements RegistroService {
         Registro registro = new Registro();
 
         registro.setActividad(actividad);
-        registro.setEstudiante(RegistroHelper.getEstudianteByCif(registroDTO.getCif())); // ✅
+        registro.setEstudiante(RegistroHelper.getEstudianteByCif(registroDTO.getCif()));
         registro.setTransporte(registroDTO.getTransporte());
         registro.setTotalConvalidado(variable.values().iterator().next());
         registro.setEstadoAsistencia(EstadoAsistencia.AUSENTE);
@@ -120,7 +122,7 @@ public class RegistroServiceImpl implements RegistroService {
                         )
                 );
 
-        // ✅ Aplicar el valor real recibido
+
         registro.setEstadoAsistencia(asistenciaDTO.getEstadoAsistencia());
 
         // Actualizar timestamp
@@ -143,5 +145,34 @@ public class RegistroServiceImpl implements RegistroService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public List<InscritoResponseDTO> verificarValorDeInscripcion(InscritoBodyDTO inscritoBodyDTO) {
+        List<InscritoResponseDTO> result = new ArrayList<>();
+
+        String cif = inscritoBodyDTO.getCif(); // BRO you forgot this line
+
+        for (String actividadIdStr : inscritoBodyDTO.getActividades()) {
+            try {
+                UUID actividadId = UUID.fromString(actividadIdStr);
+
+                Optional<Registro> registroOpt = repository.findByEstudianteCifAndActividadId(cif, actividadId);
+                boolean estaInscrito = registroOpt.isPresent();
+
+                InscritoResponseDTO dto = new InscritoResponseDTO();
+                dto.setIdActividad(actividadId.toString());
+                dto.setInscrito(estaInscrito);
+
+                result.add(dto);
+
+            } catch (IllegalArgumentException e) {
+
+            }
+        }
+
+        return result;
+    }
+
 
 }

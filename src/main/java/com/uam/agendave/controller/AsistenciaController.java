@@ -1,6 +1,8 @@
 package com.uam.agendave.controller;
 
 import com.uam.agendave.dto.Registro.AsistenciaDTO;
+import com.uam.agendave.dto.Registro.InscritoBodyDTO;
+import com.uam.agendave.dto.Registro.InscritoResponseDTO;
 import com.uam.agendave.dto.Registro.RegistroDTO;
 import com.uam.agendave.service.actividad.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.Registro.RegistroService;
@@ -56,6 +58,20 @@ public class AsistenciaController {
 
         try{
             registroService.marcarAsistencia(asistenciaDTO);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(400).body(null);
+        }
+
+        return ResponseEntity.ok().body(null);
+    }
+
+    @PreAuthorize("hasRole('ESTUDIANTE')")
+    @PostMapping("/verificar_Inscripcion")
+
+    public ResponseEntity verificarInscripcion(@RequestBody InscritoBodyDTO inscritoBodyDTO) {
+        try{
+            registroService.verificarValorDeInscripcion(inscritoBodyDTO);
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.status(400).body(null);

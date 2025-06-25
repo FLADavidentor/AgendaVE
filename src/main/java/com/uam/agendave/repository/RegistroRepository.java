@@ -19,7 +19,7 @@ public interface RegistroRepository extends JpaRepository<Registro, UUID> {
 
     long countByActividadId(UUID idActividad);
 
-    Optional<Registro> findByEstudianteCifAndActividadId(String cif, UUID idActividad); // ✅ WORKS
+    Optional<Registro> findByEstudianteCifAndActividadId(String cif, UUID idActividad);
     @Transactional
     void deleteByActividadId(UUID idActividad);
 }
