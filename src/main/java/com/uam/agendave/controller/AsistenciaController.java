@@ -4,8 +4,10 @@ import com.uam.agendave.dto.Registro.AsistenciaDTO;
 import com.uam.agendave.dto.Registro.InscritoBodyDTO;
 import com.uam.agendave.dto.Registro.InscritoResponseDTO;
 import com.uam.agendave.dto.Registro.RegistroDTO;
+import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.service.actividad.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.Registro.RegistroService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,15 +32,18 @@ public class AsistenciaController {
     // Como parametros me tienen que mandar un: Cif: String - Id de Actividad: String - Transporte:Boolean
     @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @PostMapping("/confirmar_inscripcion")
-    public ResponseEntity inscribirActividad(@RequestBody RegistroDTO registroDTO) {
-
+    public ResponseEntity<?> inscribirActividad(@RequestBody RegistroDTO registroDTO) {
         try {
             registroService.guardarRegistro(registroDTO, actividadService);
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (CupoFullException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al procesar la solicitud");
         }
-        return ResponseEntity.status(201).body(null);
     }
+
 
     @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @PostMapping("/{cif}/actividades_inscritas")
