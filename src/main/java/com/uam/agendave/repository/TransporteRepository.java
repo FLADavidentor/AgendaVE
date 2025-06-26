@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TransporteRepository extends JpaRepository<Transporte, UUID> {
-    List<Transporte> findByLugarNombreContainingIgnoreCase(String nombre);
+    List<Transporte> findByLugarNombre(String nombre);
     Optional<Transporte> findByLugarNombreIgnoreCaseAndCapacidad(String nombre, Integer capacidad);
-
 }
