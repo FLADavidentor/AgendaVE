@@ -56,9 +56,9 @@ public class AsistenciaController {
     @PostMapping("/marcar_asistencia")
     public ResponseEntity marcarAsistencia(@RequestBody AsistenciaDTO asistenciaDTO) {
 
-        try{
+        try {
             registroService.marcarAsistencia(asistenciaDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(400).body(null);
         }
@@ -68,18 +68,17 @@ public class AsistenciaController {
 
     @PreAuthorize("hasRole('ESTUDIANTE')")
     @PostMapping("/verificar_Inscripcion")
-
     public ResponseEntity verificarInscripcion(@RequestBody InscritoBodyDTO inscritoBodyDTO) {
-        try{
-            registroService.verificarValorDeInscripcion(inscritoBodyDTO);
-        }catch (Exception e){
+        try {
+            return ResponseEntity.ok().body(registroService.verificarValorDeInscripcion(inscritoBodyDTO));
+
+
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(400).body(null);
         }
 
-        return ResponseEntity.ok().body(null);
     }
-
 
 
 }
