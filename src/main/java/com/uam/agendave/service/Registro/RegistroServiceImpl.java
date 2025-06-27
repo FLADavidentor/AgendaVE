@@ -49,51 +49,56 @@ public class RegistroServiceImpl implements RegistroService {
     public void guardarRegistro(RegistroDTO registroDTO, ActividadService actividadService) {
 
 
-        Actividad actividad = actividadService.buscarPorId(registroDTO.getIdActividad());
+        try {
+            Actividad actividad = actividadService.buscarPorId(registroDTO.getIdActividad());
 
-        long inscritos = repository.countByActividadId(registroDTO.getIdActividad());
+            long inscritos = repository.countByActividadId(registroDTO.getIdActividad());
 
-        if (inscritos >= actividad.getCupo()) {
-            throw new CupoFullException("Cupo agotado para la actividad " + actividad.getNombreActividad());
-        }
+            if (inscritos >= actividad.getCupo()) {
+                throw new CupoFullException("Cupo agotado para la actividad " + actividad.getNombreActividad());
+            }
 
-        Map<TipoConvalidacion, Integer> variable = actividad.getConvalidacionesPermitidas();
+            Map<TipoConvalidacion, Integer> variable = actividad.getConvalidacionesPermitidas();
 
-        Registro registro = new Registro();
+            Registro registro = new Registro();
 
-        registro.setActividad(actividad);
-        registro.setEstudiante(RegistroHelper.getEstudianteByCif(registroDTO.getCif()));
-        registro.setTransporte(registroDTO.getTransporte());
-        registro.setTotalConvalidado(variable.values().iterator().next());
-        registro.setEstadoAsistencia(EstadoAsistencia.AUSENTE);
-        registro.setAsistenciaTimestamp(LocalDateTime.now());
-        registro.setTipoConvalidacion(registroDTO.getTipoConvalidacion());
+            registro.setActividad(actividad);
+            registro.setEstudiante(RegistroHelper.getEstudianteByCif(registroDTO.getCif()));
+            registro.setTransporte(registroDTO.getTransporte());
+            registro.setTotalConvalidado(variable.values().iterator().next());
+            registro.setEstadoAsistencia(EstadoAsistencia.AUSENTE);
+            registro.setAsistenciaTimestamp(LocalDateTime.now());
+            registro.setTipoConvalidacion(registroDTO.getTipoConvalidacion());
 
-        repository.save(registro);
+            repository.save(registro);
 
 
-        Optional<Estudiante> estudiante = estudianteRepository.findByCif(registroDTO.getCif());
-        String subject = "Confirmación de inscripción a la actividad";
-        String body = String.format("Hola %s, te has inscrito correctamente en la actividad:%n%s a las %s.",
-                estudiante.get().getNombres(),
-                registro.getActividad().getNombre(),
-                registro.getActividad().getFecha());
+            Optional<Estudiante> estudiante = estudianteRepository.findByCif(registroDTO.getCif());
+            String subject = "Confirmación de inscripción a la actividad";
+            String body = String.format("Hola %s, te has inscrito correctamente en la actividad:%n%s a las %s.",
+                    estudiante.get().getNombres(),
+                    registro.getActividad().getNombre(),
+                    registro.getActividad().getFecha());
 
-        MeetingDetailsDTO meeting = new MeetingDetailsDTO();
-        meeting.setTitle(registro.getActividad().getNombre());
-        meeting.setDate(registro.getActividad().getFecha().toString());
-        meeting.setLocation(registro.getActividad().getLugar().getNombre());
-        meeting.setSenderName("Equipo de Vida Estudiantil");
-        meeting.setPurpose("Informarte que has sido inscrito correctamente en la actividad programada y brindarte los detalles necesarios para asegurar tu participación.");
-        meeting.setTime(registro.getActividad().getHoraInicio().toString());
+            MeetingDetailsDTO meeting = new MeetingDetailsDTO();
+            meeting.setTitle(registro.getActividad().getNombre());
+            meeting.setDate(registro.getActividad().getFecha().toString());
+            meeting.setLocation(registro.getActividad().getLugar().getNombre());
+            meeting.setSenderName("Equipo de Vida Estudiantil");
+            meeting.setPurpose("Informarte que has sido inscrito correctamente en la actividad programada y brindarte los detalles necesarios para asegurar tu participación.");
+            meeting.setTime(registro.getActividad().getHoraInicio().toString());
 //        meeting.setSenderName("Equipo de Vida Estudiantil");
 
 
 //        emailService.sendConfirmation(estudiante.get().getCorreo(), subject, body);
 
 
-        emailService.sendMeetingInvitation(estudiante.get().getCorreo(), subject, meeting );
-        registroNotifService.notificarRegistroCreado(registroDTO);
+            emailService.sendMeetingInvitation(estudiante.get().getCorreo(), subject, meeting);
+            registroNotifService.notificarRegistroCreado(registroDTO);
+        }
+        catch(Exception e){
+            throw new RuntimeException(e);
+        }
 }
 
 
