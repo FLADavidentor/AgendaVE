@@ -1,12 +1,11 @@
 package com.uam.agendave.service.Registro;
 
 import com.uam.agendave.dto.Actividad.ActividadInscritaDTO;
-import com.uam.agendave.dto.Registro.AsistenciaDTO;
-import com.uam.agendave.dto.Registro.InscritoBodyDTO;
-import com.uam.agendave.dto.Registro.InscritoResponseDTO;
-import com.uam.agendave.dto.Registro.RegistroDTO;
+import com.uam.agendave.dto.Actividad.LugarDTO;
+import com.uam.agendave.dto.Registro.*;
 import com.uam.agendave.model.TipoConvalidacion;
 import com.uam.agendave.service.actividad.ActividadService;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -21,4 +20,6 @@ public interface RegistroService {
     void marcarAsistencia(AsistenciaDTO asistenciaDTO);
 
     List<InscritoResponseDTO> verificarValorDeInscripcion(InscritoBodyDTO inscritoBodyDTO);
+
+    public ResponseEntity<?> calcularAsistencia(LocationAsistenciaDTO dto);
 }

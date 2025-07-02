@@ -1,12 +1,11 @@
 package com.uam.agendave.service.Registro;
 
 import com.uam.agendave.dto.Actividad.ActividadInscritaDTO;
-import com.uam.agendave.dto.Registro.AsistenciaDTO;
+import com.uam.agendave.dto.EntidadesConfig.ZonaAsistenciaDTO;
+import com.uam.agendave.dto.Registro.*;
 import com.uam.agendave.dto.Notificaciones.MeetingDetailsDTO;
-import com.uam.agendave.dto.Registro.InscritoBodyDTO;
-import com.uam.agendave.dto.Registro.InscritoResponseDTO;
-import com.uam.agendave.dto.Registro.RegistroDTO;
 import com.uam.agendave.exception.CupoFullException;
+import com.uam.agendave.manager.ZonaAsistenciaManager;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.EstudianteRepository;
 import com.uam.agendave.repository.RegistroRepository;
@@ -15,15 +14,19 @@ import com.uam.agendave.service.actividad.ActividadService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.uam.agendave.util.GeoUtils.calcularDistanciaEnMetros;
+
 @Service
 public class RegistroServiceImpl implements RegistroService {
 
+    private final ZonaAsistenciaManager zonaAsistenciaManager;
     private final RegistroRepository repository;
     private final EstudianteRepository estudianteRepository;
     private final EmailService emailService;
@@ -35,12 +38,15 @@ public class RegistroServiceImpl implements RegistroService {
                                EstudianteRepository estudianteRepository,
                                EmailService emailService,
                                RegistroNotifService registroNotifService,
-                               AsistenciaNotifService asistenciaNotifService) {
+                               AsistenciaNotifService asistenciaNotifService,
+                               ZonaAsistenciaManager zonaAsistenciaManager
+                               ) {
         this.repository = repository;
         this.estudianteRepository = estudianteRepository;
         this.emailService = emailService;
         this.registroNotifService = registroNotifService;
         this.asistenciaNotifService = asistenciaNotifService;
+        this.zonaAsistenciaManager = zonaAsistenciaManager;
 
     }
 
@@ -178,6 +184,62 @@ public class RegistroServiceImpl implements RegistroService {
 
         return result;
     }
+    @Override
+    @Transactional
+    public ResponseEntity<?> calcularAsistencia(LocationAsistenciaDTO dto) {
+        try {
+            Optional<ZonaAsistenciaDTO> zonaOpt = zonaAsistenciaManager.obtenerZona(dto.getIdActividad());
+
+            if (zonaOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of(
+                        "success", false,
+                        "message", "No hay zona activa configurada para esta actividad"
+                ));
+            }
+
+            ZonaAsistenciaDTO zona = zonaOpt.get();
+
+            if (LocalDateTime.now().isAfter(zona.getTiempoLimite())) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "success", false,
+                        "message", "Ya no se puede marcar asistencia, tiempo límite vencido"
+                ));
+            }
+
+            double distancia = calcularDistanciaEnMetros(
+                    zona.getLat(), zona.getLng(),
+                    dto.getLatitud(), dto.getLongitud());
+
+            if (distancia > zona.getRadioMetros()) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "success", false,
+                        "message", "Estás fuera del rango permitido para marcar asistencia",
+                        "distancia", distancia
+                ));
+            }
+
+            AsistenciaDTO asistencia = new AsistenciaDTO();
+            asistencia.setCif(dto.getCif());
+            asistencia.setIdActividad(dto.getIdActividad());
+            asistencia.setEstadoAsistencia(EstadoAsistencia.PRESENTE);
+
+            marcarAsistencia(asistencia);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Asistencia marcada correctamente",
+                    "distancia", distancia
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "Error inesperado al calcular la asistencia",
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+
 
 
 }
