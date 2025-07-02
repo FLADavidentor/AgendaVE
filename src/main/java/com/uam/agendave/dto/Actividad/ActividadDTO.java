@@ -32,6 +32,8 @@ public class ActividadDTO {
     @NotBlank(message = "El lugar es obligatorio")
     private String lugar;
 
+    private Integer cuposRestantes;
+
     private UUID idTransporte;
 
     private Map<TipoConvalidacion, Integer> convalidacionesPermitidas; // Convalidaciones por tipo

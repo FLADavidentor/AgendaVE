@@ -65,14 +65,13 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     @Transactional
-    public List<ActividadDTO> obtenerActividadesActivas() {
-        // Obtener todas las actividades desde el repositorio
-
+    public List<ActividadDTO> obtenerActividadesActivas(boolean incluirCuposRestantes) {
         List<Actividad> actividades = actividadRepository.findByEstado(true);
-
-        // Convertir las entidades a DTOs
-        return actividades.stream().map(actividadMapper::toDTO).collect(toList());
+        return actividades.stream()
+                .map(a -> toDTOConCupos(a, incluirCuposRestantes))
+                .collect(toList());
     }
+
 
     @Override
     @Transactional
@@ -267,6 +266,18 @@ public class ActividadServiceImpl implements ActividadService {
         actividadRepository.deleteById(id);
 
     }
+
+    public ActividadDTO toDTOConCupos(Actividad actividad, boolean incluirCuposRestantes) {
+        ActividadDTO dto = actividadMapper.toDTO(actividad);
+
+        if (incluirCuposRestantes) {
+            long inscritos = registroRepository.countByActividadId(actividad.getId());
+            dto.setCuposRestantes(actividad.getCupo() - (int) inscritos);
+        }
+
+        return dto;
+    }
+
 
 
 }

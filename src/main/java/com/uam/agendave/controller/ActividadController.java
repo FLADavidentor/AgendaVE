@@ -52,10 +52,11 @@ public class ActividadController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
-    
     @GetMapping("/get_active")
-    public List<ActividadDTO> obtenerActividad() {
-        return actividadService.obtenerActividadesActivas();
+    public List<ActividadDTO> obtenerActividad(
+            @RequestParam(name = "cupos", defaultValue = "false") boolean incluirCuposRestantes
+    ) {
+        return actividadService.obtenerActividadesActivas(incluirCuposRestantes);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
