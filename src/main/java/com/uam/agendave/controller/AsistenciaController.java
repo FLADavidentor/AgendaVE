@@ -1,9 +1,6 @@
 package com.uam.agendave.controller;
 
-import com.uam.agendave.dto.Registro.AsistenciaDTO;
-import com.uam.agendave.dto.Registro.InscritoBodyDTO;
-import com.uam.agendave.dto.Registro.InscritoResponseDTO;
-import com.uam.agendave.dto.Registro.RegistroDTO;
+import com.uam.agendave.dto.Registro.*;
 import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.service.actividad.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.Registro.RegistroService;
@@ -13,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/asistencia")
@@ -70,6 +68,22 @@ public class AsistenciaController {
 
         return ResponseEntity.ok().body(null);
     }
+
+    @PreAuthorize("hasRole('ESTUDIANTE')")
+    @PostMapping("/calcular_asistencia")
+    public ResponseEntity<?> calcularAsistencia(@RequestBody LocationAsistenciaDTO dto) {
+        try {
+            return registroService.calcularAsistencia(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", "Ocurrió un error al calcular la asistencia",
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
 
     @PreAuthorize("hasRole('ESTUDIANTE')")
     @PostMapping("/verificar_Inscripcion")
