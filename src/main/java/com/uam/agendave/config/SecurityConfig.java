@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/usuario/login", "/usuario/login_admin", "/admin/crear").permitAll()
                         .requestMatchers("/ws-pure/**").permitAll()
+                        .requestMatchers("/backendFiles/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

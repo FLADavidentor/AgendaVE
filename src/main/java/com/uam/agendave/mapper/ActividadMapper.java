@@ -3,7 +3,6 @@ package com.uam.agendave.mapper;
 import com.uam.agendave.dto.Actividad.ActividadDTO;
 import com.uam.agendave.dto.Actividad.ImagenDTO;
 import com.uam.agendave.model.Actividad;
-import com.uam.agendave.model.ImageData;
 import com.uam.agendave.model.Lugar;
 import com.uam.agendave.model.NombreActividad;
 import com.uam.agendave.model.Transporte;
@@ -24,10 +23,10 @@ public class ActividadMapper {
         dto.setEstado(actividad.isEstado());
         dto.setCupo(actividad.getCupo());
 
-        if (actividad.getImagen() != null) {
+        // ⬇️ set image filename only (frontend will load it with backendFiles/images/[filename])
+        if (actividad.getImagenPath() != null && !actividad.getImagenPath().isBlank()) {
             ImagenDTO imagenDTO = new ImagenDTO();
-            imagenDTO.setNombre(actividad.getImagen().getNombre());
-            imagenDTO.setImagenBase64(actividad.getImagen().getImagenBase64());
+            imagenDTO.setNombre(actividad.getImagenPath()); // filename
             dto.setImagen(imagenDTO);
         }
 
@@ -58,12 +57,8 @@ public class ActividadMapper {
         actividad.setNombreActividad(nombreActividad);
         actividad.setLugar(lugar);
 
-        if (dto.getImagen() != null && dto.getImagen().getImagenBase64() != null && !dto.getImagen().getImagenBase64().isEmpty()) {
-            ImageData imageData = new ImageData();
-            imageData.setNombre(dto.getImagen().getNombre());
-            imageData.setImagenBase64(dto.getImagen().getImagenBase64());
-            actividad.setImagen(imageData);
-        }
+        // ❌ don't map imagenBase64 here
+        // that logic is handled in the service when saving or updating the entity
 
         actividad.setConvalidacionesPermitidas(dto.getConvalidacionesPermitidas());
         actividad.setTotalConvalidacionesPermitidas(dto.getTotalConvalidacionesPermitidas());

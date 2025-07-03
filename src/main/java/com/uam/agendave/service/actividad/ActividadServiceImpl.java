@@ -9,6 +9,7 @@ import com.uam.agendave.mapper.EstudianteMapper;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.*;
 import com.uam.agendave.service.Transporte.TransporteService;
+import com.uam.agendave.service.imagen.ImageStorageService;
 import com.uam.agendave.service.nombreActividad.NombreActividadService;
 import com.uam.agendave.service.nombreActividad.NombreActividadServiceImpl;
 import jakarta.transaction.Transactional;
@@ -37,9 +38,17 @@ public class ActividadServiceImpl implements ActividadService {
     private final EstudianteMapper estudianteMapper;
     private final ActividadNotifService actividadNotifService;
     private final TransporteService transporteService;
+    private final ImageStorageService imageStorageService;
 
     @Autowired
-    public ActividadServiceImpl(ActividadRepository actividadRepository, NombreActividadRepository nombreActividadRepository, LugarRepository lugarRepository, RegistroRepository registroRepository, EstudianteRepository estudianteRepository,ActividadNotifService actividadNotifService,TransporteService transporteService) {
+    public ActividadServiceImpl(ActividadRepository actividadRepository,
+                                NombreActividadRepository nombreActividadRepository,
+                                LugarRepository lugarRepository,
+                                RegistroRepository registroRepository,
+                                EstudianteRepository estudianteRepository,
+                                ActividadNotifService actividadNotifService,
+                                TransporteService transporteService,
+                                ImageStorageService imageStorageService) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
@@ -50,6 +59,7 @@ public class ActividadServiceImpl implements ActividadService {
         this.estudianteMapper = new EstudianteMapper();
         this.actividadNotifService = actividadNotifService;
         this.transporteService = transporteService;
+        this.imageStorageService = imageStorageService;
     }
 
     @Override
@@ -88,7 +98,6 @@ public class ActividadServiceImpl implements ActividadService {
     @Override
     public void guardarActividad(ActividadDTO actividadDTO) throws Exception {
         try {
-            // Buscar o crear NombreActividad
             NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
                     .stream()
                     .findFirst()
@@ -105,35 +114,31 @@ public class ActividadServiceImpl implements ActividadService {
 
             Actividad actividad = getActividad(actividadDTO, nombreActividad, lugar);
 
-            // Asociar transporte si se proporcionó un ID
             if (actividadDTO.getIdTransporte() != null) {
-                Transporte transporte = transporteService.buscarEntidadPorId(actividadDTO.getIdTransporte()); // ya existe
+                Transporte transporte = transporteService.buscarEntidadPorId(actividadDTO.getIdTransporte());
                 actividad.setTransporte(transporte);
             }
 
             actividadRepository.save(actividad);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    private static Actividad getActividad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar) {
+
+    private Actividad getActividad(ActividadDTO actividadDTO, NombreActividad nombreActividad, Lugar lugar) {
         Actividad actividad = new Actividad();
 
         ImagenDTO imgDto = actividadDTO.getImagen();
-        if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().trim().isEmpty()) {
-
-            ImageData imageData = new ImageData();
-            imageData.setNombre(imgDto.getNombre());
-            imageData.setImagenBase64(imgDto.getImagenBase64());
-            System.out.println(imageData.getImagenBase64());
-            actividad.setImagen(imageData);
-            System.out.println(actividad.getImagen().getImagenBase64());
-
-        } else {
-            // Opcional: asegurarte de que la entidad actividad permita imagen null
-            actividad.setImagen(null);
+        if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
+            try {
+                String filename = imageStorageService.saveImage(imgDto.getImagenBase64());
+                actividad.setImagenPath(filename);
+            } catch (Exception e) {
+                throw new RuntimeException("Error al guardar la imagen", e);
+            }
         }
 
         actividad.setNombre(nombreActividad.getNombre());
@@ -144,12 +149,13 @@ public class ActividadServiceImpl implements ActividadService {
         actividad.setCupo(actividadDTO.getCupo());
         actividad.setNombreActividad(nombreActividad);
         actividad.setLugar(lugar);
-
         actividad.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
         actividad.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
 
         return actividad;
     }
+
+
 
     @Override
     public int getCupoRestante(UUID actividadID) {
@@ -191,7 +197,23 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
                 .orElseThrow(() -> new NotFoundException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
-        // Actualizar campos simples
+        // ✅ image replace logic
+        String oldFilename = actividadExistente.getImagenPath();
+        ImagenDTO imgDto = actividadDTO.getImagen();
+        if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
+            try {
+                String newFilename = imageStorageService.saveImage(imgDto.getImagenBase64());
+                actividadExistente.setImagenPath(newFilename);
+
+                if (oldFilename != null && !oldFilename.equals(newFilename)) {
+                    Long usos = actividadRepository.countByImagenPath(oldFilename);
+                    imageStorageService.deleteImageIfUnused(oldFilename, usos);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error al guardar la nueva imagen", e);
+            }
+        }
+
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
         actividadExistente.setFecha(actividadDTO.getFecha());
         actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
@@ -201,8 +223,6 @@ public class ActividadServiceImpl implements ActividadService {
         actividadExistente.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
         actividadExistente.setTotalConvalidacionesPermitidas(actividadDTO.getTotalConvalidacionesPermitidas());
 
-
-        // Buscar o crear NombreActividad
         NombreActividad nombreActividad = nombreActividadRepository.findByNombre(actividadDTO.getNombreActividad())
                 .stream()
                 .findFirst()
@@ -213,36 +233,32 @@ public class ActividadServiceImpl implements ActividadService {
                 });
         actividadExistente.setNombreActividad(nombreActividad);
 
-        // Buscar Lugar
         Lugar lugar = lugarRepository.findByNombre(actividadDTO.getLugar())
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Lugar no encontrado: " + actividadDTO.getLugar()));
         actividadExistente.setLugar(lugar);
 
-        // Asociar transporte si se especificó
         if (actividadDTO.getIdTransporte() != null) {
             Transporte transporte = transporteService.buscarEntidadPorId(actividadDTO.getIdTransporte());
             actividadExistente.setTransporte(transporte);
         } else {
-            actividadExistente.setTransporte(null); // Omitir esta línea si no se desea borrar transporte al editar
+            actividadExistente.setTransporte(null);
         }
 
-        // Guardar cambios
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
-        // Notificación WebSocket
         if (actividadDTO.isEstado()) {
             actividadNotifService.notificarActividadPublicada(actividadMapper.toDTO(actividadActualizada));
         } else {
             actividadNotifService.notificarActividadDesPublicada(actividadMapper.toDTO(actividadActualizada));
         }
 
-        // Limpiar NombreActividad si no se usa
         eliminarNombreActividadNoUsado(nombreActividad);
 
         return actividadMapper.toDTO(actividadActualizada);
     }
+
 
 
     private void eliminarNombreActividadNoUsado(NombreActividad nombreActividad) {
@@ -257,17 +273,21 @@ public class ActividadServiceImpl implements ActividadService {
     @Override
     @Transactional
     public void eliminarActividad(UUID id) {
+        Actividad actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Actividad no encontrada con ID: " + id));
 
+        String filename = actividad.getImagenPath();
 
-        if (!actividadRepository.existsById(id)) {
-            throw new NotFoundException("Actividad no encontrada con ID: " + id);
-        }
         registroRepository.deleteByActividadId(id);
         actividadRepository.deleteById(id);
 
+        if (filename != null) {
+            long usos = actividadRepository.countByImagenPath(filename);
+            imageStorageService.deleteImageIfUnused(filename, usos);
+        }
     }
 
-    public ActividadDTO toDTOConCupos(Actividad actividad, boolean incluirCuposRestantes) {
+    private ActividadDTO toDTOConCupos(Actividad actividad, boolean incluirCuposRestantes) {
         ActividadDTO dto = actividadMapper.toDTO(actividad);
 
         if (incluirCuposRestantes) {
@@ -277,6 +297,8 @@ public class ActividadServiceImpl implements ActividadService {
 
         return dto;
     }
+
+
 
 
 

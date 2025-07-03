@@ -57,9 +57,8 @@ public class Actividad extends Identifiable {
     @JoinColumn(name = "idUsuario")
     private Usuario usuario;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = true)
-    @JoinColumn(name = "imagen_id", nullable = true)
-    private ImageData imagen;
+    @Column(name = "imagen_path")
+    private String imagenPath; // e.g. "abc123.jpg"
 
 
 

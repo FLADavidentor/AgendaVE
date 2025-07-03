@@ -40,4 +40,5 @@ public class ActividadDTO {
     private Integer totalConvalidacionesPermitidas;
 
     private ImagenDTO imagen;
+    private String imagenPath;
 }
