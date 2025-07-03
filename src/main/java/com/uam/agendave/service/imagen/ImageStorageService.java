@@ -19,6 +19,10 @@ public class ImageStorageService {
     private String imageStoragePath;
 
     public String saveImage(String base64Image) throws IOException, NoSuchAlgorithmException {
+        if (base64Image == null || base64Image.trim().isEmpty()) {
+            return null;
+        }
+
         byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
         String hash = sha256Hex(decodedBytes);
         String filename = hash + ".jpg";
@@ -30,6 +34,7 @@ public class ImageStorageService {
 
         return filename;
     }
+
 
     public void deleteImageIfUnused(String filename, long countOfUsages) {
         if (filename == null || countOfUsages > 1) return;

@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ActividadInscritaDTO {
-    private Actividad actividad;
+    private ActividadDTO actividad;
     private String tipoConvalidacion;
 }

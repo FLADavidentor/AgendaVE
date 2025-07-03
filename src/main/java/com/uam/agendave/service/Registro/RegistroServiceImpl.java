@@ -6,6 +6,7 @@ import com.uam.agendave.dto.Registro.*;
 import com.uam.agendave.dto.Notificaciones.MeetingDetailsDTO;
 import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.manager.ZonaAsistenciaManager;
+import com.uam.agendave.mapper.ActividadMapper;
 import com.uam.agendave.model.*;
 import com.uam.agendave.repository.EstudianteRepository;
 import com.uam.agendave.repository.RegistroRepository;
@@ -32,6 +33,7 @@ public class RegistroServiceImpl implements RegistroService {
     private final EmailService emailService;
     private final RegistroNotifService registroNotifService;
     private final AsistenciaNotifService asistenciaNotifService;
+    private final ActividadMapper actividadMapper;
 
 @Autowired
     public RegistroServiceImpl(RegistroRepository repository,
@@ -39,7 +41,8 @@ public class RegistroServiceImpl implements RegistroService {
                                EmailService emailService,
                                RegistroNotifService registroNotifService,
                                AsistenciaNotifService asistenciaNotifService,
-                               ZonaAsistenciaManager zonaAsistenciaManager
+                               ZonaAsistenciaManager zonaAsistenciaManager,
+                               ActividadMapper actividadMapper
                                ) {
         this.repository = repository;
         this.estudianteRepository = estudianteRepository;
@@ -47,6 +50,7 @@ public class RegistroServiceImpl implements RegistroService {
         this.registroNotifService = registroNotifService;
         this.asistenciaNotifService = asistenciaNotifService;
         this.zonaAsistenciaManager = zonaAsistenciaManager;
+        this.actividadMapper = actividadMapper;
 
     }
 
@@ -150,7 +154,7 @@ public class RegistroServiceImpl implements RegistroService {
                 .stream()
                 .map(registro -> {
                     ActividadInscritaDTO dto = new ActividadInscritaDTO();
-                    dto.setActividad(registro.getActividad());
+                    dto.setActividad(actividadMapper.toDTO(registro.getActividad()));
                     dto.setTipoConvalidacion(registro.getTipoConvalidacion().name());
                     return dto;
                 })
