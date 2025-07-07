@@ -4,6 +4,7 @@ import com.uam.agendave.dto.Registro.*;
 import com.uam.agendave.exception.CupoFullException;
 import com.uam.agendave.service.actividad.ActividadService;  // Asegúrate de importar esta clase
 import com.uam.agendave.service.Registro.RegistroService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +31,7 @@ public class AsistenciaController {
     // Como parametros me tienen que mandar un: Cif: String - Id de Actividad: String - Transporte:Boolean
     @PreAuthorize("hasAnyRole('ADMIN','ESTUDIANTE')")
     @PostMapping("/confirmar_inscripcion")
-    public ResponseEntity<?> inscribirActividad(@RequestBody RegistroDTO registroDTO) {
+    public ResponseEntity<?> inscribirActividad(@Valid @RequestBody RegistroDTO registroDTO) {
         try {
             registroService.guardarRegistro(registroDTO, actividadService);
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
