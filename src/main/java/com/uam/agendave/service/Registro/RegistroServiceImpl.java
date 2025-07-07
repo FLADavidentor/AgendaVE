@@ -59,7 +59,7 @@ public class RegistroServiceImpl implements RegistroService {
     public void guardarRegistro(RegistroDTO registroDTO, ActividadService actividadService) {
 
 
-        try {
+
             Actividad actividad = actividadService.buscarPorId(registroDTO.getIdActividad());
 
             long inscritos = repository.countByActividadId(registroDTO.getIdActividad());
@@ -105,10 +105,7 @@ public class RegistroServiceImpl implements RegistroService {
 
             emailService.sendMeetingInvitation(estudiante.get().getCorreo(), subject, meeting);
             registroNotifService.notificarRegistroCreado(registroDTO);
-        }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }
+
 }
 
 
