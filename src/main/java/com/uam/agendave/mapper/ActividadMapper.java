@@ -23,7 +23,7 @@ public class ActividadMapper {
         dto.setEstado(actividad.isEstado());
         dto.setCupo(actividad.getCupo());
 
-        // ⬇️ set image filename only (frontend will load it with backendFiles/images/[filename])
+
         if (actividad.getImagenPath() != null && !actividad.getImagenPath().isBlank()) {
             ImagenDTO imagenDTO = new ImagenDTO();
             imagenDTO.setNombre(actividad.getImagenPath()); // filename
@@ -57,8 +57,7 @@ public class ActividadMapper {
         actividad.setNombreActividad(nombreActividad);
         actividad.setLugar(lugar);
 
-        // ❌ don't map imagenBase64 here
-        // that logic is handled in the service when saving or updating the entity
+
 
         actividad.setConvalidacionesPermitidas(dto.getConvalidacionesPermitidas());
         actividad.setTotalConvalidacionesPermitidas(dto.getTotalConvalidacionesPermitidas());

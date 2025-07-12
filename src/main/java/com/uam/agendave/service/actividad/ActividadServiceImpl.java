@@ -197,7 +197,6 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
                 .orElseThrow(() -> new NotFoundException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
-        // ✅ image replace logic
         String oldFilename = actividadExistente.getImagenPath();
         ImagenDTO imgDto = actividadDTO.getImagen();
         if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
