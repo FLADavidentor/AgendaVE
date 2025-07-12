@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 public class PromoImagesRequest {
     @NotBlank(message = "La Imagen es requerida")
-    private String ImagenBase64;
+    private String imagenBase64;
 }

@@ -10,5 +10,5 @@ import lombok.Setter;
 @Setter
 public class PromoImages extends Identifiable{
     @Column(name = "imagen_path")
-    private String ImagenPath;
+    private String imagenPath;
 }
