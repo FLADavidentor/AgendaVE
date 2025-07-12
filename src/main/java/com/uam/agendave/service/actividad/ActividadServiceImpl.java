@@ -277,13 +277,15 @@ public class ActividadServiceImpl implements ActividadService {
 
         String filename = actividad.getImagenPath();
 
-        registroRepository.deleteByActividadId(id);
-        actividadRepository.deleteById(id);
-
         if (filename != null) {
             long usos = actividadRepository.countByImagenPath(filename);
             imageStorageService.deleteImageIfUnused(filename, usos);
         }
+
+        registroRepository.deleteByActividadId(id);
+        actividadRepository.deleteById(id);
+
+
     }
 
     private ActividadDTO toDTOConCupos(Actividad actividad, boolean incluirCuposRestantes) {
