@@ -42,4 +42,11 @@ public class PromoImagesController {
         return imagenPromoService.EliminarImagenPromo(promoImagesResponses);
 
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get_all")
+    public ResponseEntity<?> getClasificadas() {
+        return imagenPromoService.ObtenerTodasImagenesClasificadas();
+    }
+
 }

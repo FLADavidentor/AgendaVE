@@ -11,6 +11,8 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ImageStorageService {
@@ -33,6 +35,18 @@ public class ImageStorageService {
         }
 
         return filename;
+    }
+
+    public List<String> listImageFilenames() {
+        try {
+            return Files.list(Paths.get(imageStoragePath))
+                    .filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString())
+                    .filter(name -> name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("could not list images", e);
+        }
     }
 
 

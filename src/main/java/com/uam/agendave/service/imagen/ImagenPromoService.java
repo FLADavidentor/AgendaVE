@@ -1,9 +1,11 @@
 package com.uam.agendave.service.imagen;
 
+import com.uam.agendave.dto.Imagen.ImagenesParaListaDTO;
 import com.uam.agendave.dto.Imagen.PromoImagesRequest;
 import com.uam.agendave.dto.Imagen.PromoImagesResponse;
 import com.uam.agendave.mapper.ImagenPromoMapper;
 import com.uam.agendave.model.PromoImages;
+import com.uam.agendave.model.TipoImagen;
 import com.uam.agendave.repository.PromoImagesRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -70,6 +72,41 @@ public class ImagenPromoService {
             return ResponseEntity.internalServerError().body(Map.of(
                     "success", false,
                     "message", "error inesperado al eliminar imagen",
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+    public ResponseEntity<?> ObtenerTodasImagenesClasificadas() {
+        try {
+            // get all image filenames from folder
+            List<String> allFilenames = imageStorageService.listImageFilenames();
+
+            // get all promo image paths from DB
+            List<PromoImages> promoEntities = promoImagesRepository.findAll();
+            List<String> promoPaths = promoEntities.stream()
+                    .map(PromoImages::getImagenPath)
+                    .toList();
+
+            // assemble the DTOs
+            List<ImagenesParaListaDTO> result = allFilenames.stream()
+                    .map(filename -> {
+                        ImagenesParaListaDTO dto = new ImagenesParaListaDTO();
+                        dto.setImagenPath(filename);
+                        if (promoPaths.contains(filename)) {
+                            dto.setTipoImagen(TipoImagen.PROMOCIONAL);
+                        } else {
+                            dto.setTipoImagen(TipoImagen.ACTIVIDAD);
+                        }
+                        return dto;
+                    })
+                    .toList();
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "error al clasificar las imágenes",
                     "error", e.getMessage()
             ));
         }
