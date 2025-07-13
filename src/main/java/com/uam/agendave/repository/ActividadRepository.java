@@ -23,4 +23,5 @@ public interface ActividadRepository extends JpaRepository<Actividad, UUID> {
 
     Long countByImagenPath(String imagenPath);
 
+    List<Actividad> estado(boolean estado);
 }

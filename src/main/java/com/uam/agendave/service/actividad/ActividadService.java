@@ -29,6 +29,5 @@ public interface ActividadService {
 
     List<ActividadDTO> obtenerActividadesActivas(boolean IncluirCuposRestantes);
 
-
     List<ActividadDTO> obtenerActividadesPorNombre(String nombre);
 }

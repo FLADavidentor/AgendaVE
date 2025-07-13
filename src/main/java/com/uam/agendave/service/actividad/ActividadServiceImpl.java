@@ -12,12 +12,17 @@ import com.uam.agendave.service.Transporte.TransporteService;
 import com.uam.agendave.service.imagen.ImageStorageService;
 import com.uam.agendave.service.nombreActividad.NombreActividadService;
 import com.uam.agendave.service.nombreActividad.NombreActividadServiceImpl;
+import com.uam.agendave.service.notificacion.NotificationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +44,7 @@ public class ActividadServiceImpl implements ActividadService {
     private final ActividadNotifService actividadNotifService;
     private final TransporteService transporteService;
     private final ImageStorageService imageStorageService;
+    private final NotificationService notificationService;
 
     @Autowired
     public ActividadServiceImpl(ActividadRepository actividadRepository,
@@ -48,7 +54,8 @@ public class ActividadServiceImpl implements ActividadService {
                                 EstudianteRepository estudianteRepository,
                                 ActividadNotifService actividadNotifService,
                                 TransporteService transporteService,
-                                ImageStorageService imageStorageService) {
+                                ImageStorageService imageStorageService,
+                                NotificationService notificationService) {
         this.actividadRepository = actividadRepository;
         this.nombreActividadRepository = nombreActividadRepository;
         this.nombreActividadService = new NombreActividadServiceImpl(nombreActividadRepository);
@@ -60,6 +67,7 @@ public class ActividadServiceImpl implements ActividadService {
         this.actividadNotifService = actividadNotifService;
         this.transporteService = transporteService;
         this.imageStorageService = imageStorageService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -197,6 +205,32 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividadExistente = actividadRepository.findById(actividadDTO.getId())
                 .orElseThrow(() -> new NotFoundException("La actividad a actualizar no existe con ID: " + actividadDTO.getId()));
 
+        // check and notify if horaInicio changed
+        if (actividadExistente.getHoraInicio() != null && !actividadExistente.getHoraInicio().equals(actividadDTO.getHoraInicio())) {
+            notificationService.notificarCambioActividad(
+                    actividadExistente,
+                    "hora de inicio",
+                    actividadExistente.getHoraInicio().toString(),
+                    actividadDTO.getHoraInicio().toString()
+            );
+            actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
+        } else {
+            actividadExistente.setHoraInicio(actividadDTO.getHoraInicio()); // fallback if null or same
+        }
+
+// check and notify if horaFin changed
+        if (actividadExistente.getHoraFin() != null && !actividadExistente.getHoraFin().equals(actividadDTO.getHoraFin())) {
+            notificationService.notificarCambioActividad(
+                    actividadExistente,
+                    "hora de fin",
+                    actividadExistente.getHoraFin().toString(),
+                    actividadDTO.getHoraFin().toString()
+            );
+            actividadExistente.setHoraFin(actividadDTO.getHoraFin());
+        } else {
+            actividadExistente.setHoraFin(actividadDTO.getHoraFin()); // fallback if null or same
+        }
+
         String oldFilename = actividadExistente.getImagenPath();
         ImagenDTO imgDto = actividadDTO.getImagen();
         if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
@@ -215,8 +249,6 @@ public class ActividadServiceImpl implements ActividadService {
 
         actividadExistente.setDescripcion(actividadDTO.getDescripcion());
         actividadExistente.setFecha(actividadDTO.getFecha());
-        actividadExistente.setHoraInicio(actividadDTO.getHoraInicio());
-        actividadExistente.setHoraFin(actividadDTO.getHoraFin());
         actividadExistente.setEstado(actividadDTO.isEstado());
         actividadExistente.setCupo(actividadDTO.getCupo());
         actividadExistente.setConvalidacionesPermitidas(actividadDTO.getConvalidacionesPermitidas());
@@ -244,6 +276,21 @@ public class ActividadServiceImpl implements ActividadService {
         } else {
             actividadExistente.setTransporte(null);
         }
+
+        boolean nuevoEstado = actividadDTO.isEstado();
+        boolean estadoAnterior = actividadExistente.isEstado();
+
+        LocalDateTime fechaHoraFin = LocalDateTime.of(
+                actividadExistente.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                actividadExistente.getHoraFin().toLocalTime()
+        );
+        actividadExistente.setEstado(nuevoEstado);
+
+        if (estadoAnterior && !nuevoEstado && LocalDateTime.now().isBefore(fechaHoraFin)) {
+            notificationService.notificarActividadCancelada(actividadExistente);
+        }
+
+
 
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
