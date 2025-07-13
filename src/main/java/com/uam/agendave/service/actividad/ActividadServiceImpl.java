@@ -305,9 +305,9 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividadActualizada = actividadRepository.save(actividadExistente);
 
         if (actividadDTO.isEstado()) {
-            actividadNotifService.notificarActividadPublicada(actividadMapper.toDTO(actividadActualizada));
+            actividadNotifService.notificarActividadPublicada(toDTOConCupos(actividadActualizada, true));
         } else {
-            actividadNotifService.notificarActividadDesPublicada(actividadMapper.toDTO(actividadActualizada));
+            actividadNotifService.notificarActividadDesPublicada(toDTOConCupos(actividadActualizada, true));
         }
 
         eliminarNombreActividadNoUsado(nombreActividad);
