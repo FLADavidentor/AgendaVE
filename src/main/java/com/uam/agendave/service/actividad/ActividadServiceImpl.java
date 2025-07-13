@@ -231,6 +231,16 @@ public class ActividadServiceImpl implements ActividadService {
             actividadExistente.setHoraFin(actividadDTO.getHoraFin()); // fallback if null or same
         }
 
+        if (actividadExistente.getFecha() != null && !actividadExistente.getFecha().equals(actividadDTO.getFecha())) {
+            notificationService.notificarCambioActividad(
+                    actividadExistente,
+                    "fecha",
+                    actividadExistente.getFecha().toString(),
+                    actividadDTO.getFecha().toString()
+            );
+        }
+
+
         String oldFilename = actividadExistente.getImagenPath();
         ImagenDTO imgDto = actividadDTO.getImagen();
         if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
