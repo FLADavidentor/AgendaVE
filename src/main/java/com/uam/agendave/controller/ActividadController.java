@@ -162,10 +162,20 @@ public class ActividadController {
         LugarDTO lugar = lugarService.buscarPorActividad(idActividad);
         ZonaAsistenciaDTO zona = null;
 
+        ZonaAsistenciaDTO zona = null;
+
         if (asistenciaConfigStoreService.existeConfiguracion(idActividad)) {
             ConfigAsistenciaTemporal config = asistenciaConfigStoreService.obtenerConfiguracion(idActividad);
-            zona = new ZonaAsistenciaDTO(idActividad, lugar.getLatitud(), config.getTiempoLimite());
+        
+            zona = new ZonaAsistenciaDTO(
+                idActividad,
+                config.getLat(),   // pulled from memory (configured explicitly)
+                config.getLng(),
+                config.getRadioMetros(),
+                config.getTiempoLimite()
+            );
         }
+
 
         return new ResumenActividadDTO(actividad, lugar, zona);
     }
