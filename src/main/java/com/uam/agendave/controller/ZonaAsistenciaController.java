@@ -40,9 +40,12 @@ public class ZonaAsistenciaController {
 
         var config = asistenciaConfigStoreService.obtenerConfiguracion(idActividad);
         return new ZonaAsistenciaDTO(
-                idActividad,
-                config.getRadioMetros(),
-                config.getTiempoLimite()
+            idActividad,
+            config.getLat(),
+            config.getLng(),
+            config.getRadioMetros(),
+            config.getTiempoLimite()
         );
+
     }
 }
