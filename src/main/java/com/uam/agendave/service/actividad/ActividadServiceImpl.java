@@ -142,14 +142,20 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividad = new Actividad();
 
         ImagenDTO imgDto = actividadDTO.getImagen();
-        if (imgDto != null && imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
-            try {
-                String filename = imageStorageService.saveImage(imgDto.getImagenBase64());
-                actividad.setImagenPath(filename);
-            } catch (Exception e) {
-                throw new RuntimeException("Error al guardar la imagen", e);
+        if (imgDto != null) {
+            if (imgDto.getImagenBase64() != null && !imgDto.getImagenBase64().isBlank()) {
+                try {
+                    String filename = imageStorageService.saveImage(imgDto.getImagenBase64());
+                    actividad.setImagenPath(filename);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error al guardar la imagen", e);
+                }
+            } else if (imgDto.getNombre() != null && !imgDto.getNombre().isBlank()) {
+                // fallback to existing filename if base64 is missing
+                actividad.setImagenPath(imgDto.getNombre());
             }
         }
+
 
         actividad.setNombre(nombreActividad.getNombre());
         actividad.setDescripcion(actividadDTO.getDescripcion());
