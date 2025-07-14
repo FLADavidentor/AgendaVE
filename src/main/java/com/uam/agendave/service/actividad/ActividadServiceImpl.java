@@ -16,7 +16,9 @@ import com.uam.agendave.service.notificacion.NotificationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -189,8 +191,19 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public Page<ActividadDTO> obtenerActividades(Pageable pageable) {
-        return actividadRepository.findAll(pageable).map(actividadMapper::toDTO);
+        Sort defaultSort = Sort.by("fecha").descending()
+                .and(Sort.by("horaInicio").descending());
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort().isSorted() ? pageable.getSort() : defaultSort
+        );
+
+        return actividadRepository.findAll(sortedPageable)
+                .map(actividadMapper::toDTO);
     }
+
 
 
 
