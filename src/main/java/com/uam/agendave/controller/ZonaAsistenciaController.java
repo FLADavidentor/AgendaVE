@@ -22,6 +22,8 @@ public class ZonaAsistenciaController {
         // 1. Guardar configuración en memoria
         asistenciaConfigStoreService.guardarConfiguracion(
                 zona.getIdActividad(),
+                zona.getLat(),
+                zona.getLng(),
                 zona.getRadioMetros(),
                 zona.getTiempoLimite()
         );
