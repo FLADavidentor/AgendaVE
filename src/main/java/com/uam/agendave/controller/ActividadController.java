@@ -162,7 +162,6 @@ public class ActividadController {
         LugarDTO lugar = lugarService.buscarPorActividad(idActividad);
         ZonaAsistenciaDTO zona = null;
 
-        ZonaAsistenciaDTO zona = null;
 
         if (asistenciaConfigStoreService.existeConfiguracion(idActividad)) {
             ConfigAsistenciaTemporal config = asistenciaConfigStoreService.obtenerConfiguracion(idActividad);
