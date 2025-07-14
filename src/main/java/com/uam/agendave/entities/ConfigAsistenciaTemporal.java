@@ -16,7 +16,7 @@ public class ConfigAsistenciaTemporal {
     private Double lng;
 
 
-    public ConfigAsistenciaTemporal(Double radioMetros, LocalDateTime tiempoLimite) {
+    public ConfigAsistenciaTemporal(Double lat, Double lng, Double radioMetros, LocalDateTime tiempoLimite) {
         this.lat = lat;
         this.lng = lng;
         this.radioMetros = radioMetros;
