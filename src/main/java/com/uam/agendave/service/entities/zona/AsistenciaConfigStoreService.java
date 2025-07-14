@@ -13,9 +13,10 @@ public class AsistenciaConfigStoreService {
 
     private final Map<UUID, ConfigAsistenciaTemporal> configuraciones = new ConcurrentHashMap<>();
 
-    public void guardarConfiguracion(UUID idActividad, double radioMetros, LocalDateTime tiempoLimite) {
-        configuraciones.put(idActividad, new ConfigAsistenciaTemporal(radioMetros, tiempoLimite));
+    public void guardarConfiguracion(UUID idActividad, Double lat, Double lng, double radioMetros, LocalDateTime tiempoLimite) {
+        configuraciones.put(idActividad, new ConfigAsistenciaTemporal(lat, lng, radioMetros, tiempoLimite));
     }
+
 
     public ConfigAsistenciaTemporal obtenerConfiguracion(UUID idActividad) {
         return configuraciones.get(idActividad);
