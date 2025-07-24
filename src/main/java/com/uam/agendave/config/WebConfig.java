@@ -12,6 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // change "/backendFiles/**" to whatever URL path you wanna expose it under
         registry.addResourceHandler("/backendFiles/images/**")
-                .addResourceLocations("file:/mnt/navidrome-music/backendFiles/images/");
+                .addResourceLocations("file:/home/baxava/Pictures/backendImages");
     }
 }

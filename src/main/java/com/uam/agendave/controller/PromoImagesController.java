@@ -32,7 +32,6 @@ public class PromoImagesController {
     public ResponseEntity<?> getPromo() {
 
         return imagenPromoService.ObtenerImagenesPromo();
-
     }
 
     @PreAuthorize("hasRole('ADMIN')")
