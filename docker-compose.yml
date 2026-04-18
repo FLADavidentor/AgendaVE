@@ -1,0 +1,18 @@
+services:
+  agenda-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agenda-backend-agenda-backend
+    container_name: agenda-backend
+    ports:
+      - "8181:8181"
+    volumes:
+      - /mnt/navidrome-music/backendFiles/images:/mnt/navidrome-music/backendFiles/images
+    networks:
+      - agendanet
+
+networks:
+  agendanet:
+    external: true
+    name: agendanet
